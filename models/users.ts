@@ -3,20 +3,22 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 // const validator = require("validator");
 
 interface IUser extends Document {
-  fname: string;
-  lname: string;
+  rmbname: string;
+  rmbdistrict: string;
+  rmbprovince: string;
   email: string;
-  Mnumber: number;
+  mobilenumber: string;
+  idnumber: string;
   password?: string;
   cpassword?: string;
 }
 
 const UserSchema: Schema<IUser> = new mongoose.Schema({
-  fname: {
+  rmbname: {
     type: String,
     required: true,
   },
-  lname: {
+  rmbdistrict: {
     type: String,
     required: true,
   },
@@ -26,16 +28,19 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
     unique: true,
     // validate: [validator.isEmail, "Please provide valid email"],
   },
-  Mnumber: {
-    type: Number,
+  mobilenumber: {
+    type: String,
     required: true,
-    unique: true,
     // validate: {
     //   validator: function (val) {
     //     return /^[789]\d{9}$/.test(val.toString());
     //   },
     //   message: "Please provide a valid mobile number",
     // },
+  },
+  idnumber: {
+    type: String,
+    required: true,
   },
   password: {
     type: String,
@@ -44,7 +49,6 @@ const UserSchema: Schema<IUser> = new mongoose.Schema({
   },
   cpassword: {
     type: String,
-    required: true,
     // validate: {
     //   validator: function (val) {
     //     return val === this.password;

@@ -27,7 +27,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "lib/mongo/mongodb.ts"
+    "lib/mongo/mongodb.js"
   ],
   "exclude": ["node_modules"]
 }

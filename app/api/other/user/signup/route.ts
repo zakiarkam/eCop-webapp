@@ -2,72 +2,79 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 import User from "@/models/users";
 import connectToDatabase from "@/lib/mongo/mongodb";
-import { error } from "console";
+
+await connectToDatabase();
 
 export async function POST(request: Request) {
-  const { fname, lname, email, Mnumber, password, cpassword } =
-    await request.json();
-
-  const isValidEmail = (email: string) => {
-    const emailRegex = /^((?!\.)[\w\-_.]*[^.])(@\w+)(\.\w+(\.\w+)?[^.\W])$/;
-
-    return emailRegex.test(email);
-  };
-
-  if (!fname || !email || !lname || !password || !cpassword || !lname) {
-    return NextResponse.json(
-      { message: "All fieds are required" },
-      { status: 400 }
-    );
-  }
-
-  if (!isValidEmail(email)) {
-    return NextResponse.json(
-      { message: "Invalid Email Format" },
-      { status: 400 }
-    );
-  }
-  if (cpassword !== password) {
-    return NextResponse.json(
-      { message: "Password doesn't match" },
-      { status: 400 }
-    );
-  }
-  if (password.length < 8) {
-    return NextResponse.json(
-      { message: "Password must be atleast 6 Characters" },
-      { status: 400 }
-    );
-  }
-
   try {
-    await connectToDatabase();
-    const existingUser = await User.findOne({ Mnumber });
+    const {
+      rmbname,
+      rmbdistrict,
+      rmbprovince,
+      email,
+      mobilenumber,
+      password,
+      idnumber,
+    } = await request.json();
+
+    // if (!rmbname || !rmbdistrict || !email || !password || !mobilenumber) {
+    //   return NextResponse.json(
+    //     { message: "All fields are required" },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // if (!emailRegex.test(email)) {
+    //   return NextResponse.json(
+    //     { message: "Invalid Email Format" },
+    //     { status: 400 }
+    //   );
+    // }
+
+    // if (password.length < 8) {
+    //   return NextResponse.json(
+    //     { message: "Password must be at least 8 characters" },
+    //     { status: 400 }
+    //   );
+    // }
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
-        { message: " User already exists" },
-        { status: 400 }
+        { message: "Email already in use" },
+        { status: 409 }
       );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const newUser = new User({
-      fname,
-      lname,
+      rmbname,
+      rmbdistrict,
+      rmbprovince,
       email,
-      Mnumber,
+      mobilenumber,
+      idnumber,
       password: hashedPassword,
     });
+
     await newUser.save();
     return NextResponse.json(
-      { message: "User Created Successfully" },
+      { message: "User created successfully" },
       { status: 201 }
     );
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.error("Error during user signup:", error.message, error.stack);
+
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { message: "Duplicate entry: Email already exists" },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
-      { message: "something went wrong" },
+      { message: "Internal Server Error" },
       { status: 500 }
     );
   }

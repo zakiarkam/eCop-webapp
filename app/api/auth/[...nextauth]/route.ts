@@ -12,31 +12,31 @@ const handler = NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: {},
-        password: {},
+        email: { label: "email", type: "email" },
+        password: { label: "password", type: "password" },
       },
       async authorize(credentials) {
         try {
           await connectToDatabase();
-          const user = await User.findById({ email: credentials?.email });
+          const user = await User.findOne({ email: credentials?.email });
           if (!user) {
-            throw new Error("");
+            throw new Error("User not found");
           }
           const isValidPassword = await bcrypt.compare(
             credentials?.password ?? "",
             user.password as string
           );
           if (!isValidPassword) {
-            throw new Error("");
+            throw new Error("Invalid password");
           }
           return user;
-        } catch {
+        } catch (error) {
+          console.error("Authorization error:", error);
           return null;
         }
       },
     }),
   ],
-
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -49,16 +49,16 @@ const handler = NextAuth({
       if (token) {
         session.user = {
           email: token.email,
-          name: token.name,
+          // name: token.name,
         };
       }
       return session;
     },
   },
   pages: {
-    signIn: "/auth/sigin",
+    signIn: "/auth/signin",
   },
-
   secret: process.env.NEXTAUTH_SECRET,
 });
-export { handler as Get, handler as POST };
+
+export { handler as GET, handler as POST };

@@ -3,7 +3,7 @@ import SignUpForm from "./components/SignUpForm";
 
 export default function page() {
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white md:h-screen sm:h-full pb-4">
       <SignUpForm />
     </div>
   );
