@@ -1,10 +1,23 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AiOutlineArrowDown } from "react-icons/ai";
-
+type mytype = {
+  fullName: string;
+  nameWithInitials: string;
+  dob: string;
+  age: string;
+  issueDate: string;
+  expiryDate: string;
+  idNumber: string;
+  licenceNumber: string;
+  permanentAddress: string;
+  vehicleCategories: string[]; // Explicitly typed as an array of strings
+  issueDatePerCategory: { [key: string]: string };
+  expiryDatePerCategory: { [key: string]: string };
+};
 export default function LicenceDetailsForm() {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<mytype>({
     fullName: "",
     nameWithInitials: "",
     dob: "",
@@ -14,9 +27,9 @@ export default function LicenceDetailsForm() {
     idNumber: "",
     licenceNumber: "",
     permanentAddress: "",
-    vehicleCategories: [""],
-    issueDatePerCategory: {} as { [key: string]: string },
-    expiryDatePerCategory: {} as { [key: string]: string },
+    vehicleCategories: [], // Now it's correctly typed
+    issueDatePerCategory: {},
+    expiryDatePerCategory: {},
   });
 
   const [error, setError] = useState("");
@@ -80,6 +93,25 @@ export default function LicenceDetailsForm() {
     }
 
     return null;
+  };
+
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    return m < 0 || (m === 0 && today.getDate() < birthDate.getDate())
+      ? age - 1
+      : age;
+  };
+
+  const handleDobChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    setForm((prevForm) => ({
+      ...prevForm,
+      dob: value,
+      age: calculateAge(value).toString(),
+    }));
   };
 
   const handleSubmit = (e: any) => {
@@ -146,6 +178,27 @@ export default function LicenceDetailsForm() {
   };
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false); // Close the dropdown
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleDropdownToggle = () => {
+    setDropdownOpen((prevState) => !prevState); // Toggle dropdown
+  };
 
   return (
     <div className="font-[sans-serif]">
@@ -179,7 +232,6 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 Name with Initials
@@ -194,7 +246,6 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 Date of Birth
@@ -204,7 +255,7 @@ export default function LicenceDetailsForm() {
                 type="date"
                 className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 value={form.dob}
-                onChange={handleChange}
+                onChange={handleDobChange}
                 required
               />
             </div>
@@ -219,9 +270,9 @@ export default function LicenceDetailsForm() {
                 value={form.age}
                 onChange={handleChange}
                 required
+                readOnly
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 Date of Issue of the licence
@@ -235,7 +286,6 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 Date of Expiry of the licence
@@ -249,7 +299,6 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 Administrative Number (ID No)
@@ -264,7 +313,6 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 licence Number
@@ -279,7 +327,6 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
                 Permanent Place of Residence
@@ -294,26 +341,28 @@ export default function LicenceDetailsForm() {
                 required
               />
             </div>
-
             <div className="relative">
               <label className="text-gray-800 text-sm mb-2 block">
                 Categories of Vehicles
               </label>
-              <div className="relative">
+              <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="bg-gray-100 focus:bg-transparent w-full text-gray-500 text-sm  px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
+                  onClick={handleDropdownToggle}
+                  className="bg-gray-100 focus:bg-transparent w-full text-gray-500 text-sm px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 >
-                  {" "}
-                  Select the Categories of Vehicle
-                  {form.vehicleCategories.length > 0
-                    ? form.vehicleCategories.join(", ")
-                    : "Select categories"}
-                  <span className="ml-2 text-gray-500">
-                    {" "}
-                    <AiOutlineArrowDown size={18} className="text-gray-500" />
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span>
+                      {form.vehicleCategories.length > 0
+                        ? `${form.vehicleCategories.length} ${
+                            form.vehicleCategories.length === 1
+                              ? "category"
+                              : "categories"
+                          } selected`
+                        : "Select categories"}
+                    </span>
+                    <AiOutlineArrowDown size={14} className="text-gray-500" />
+                  </div>
                 </button>
                 {dropdownOpen && (
                   <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-md max-h-40 overflow-y-auto">
