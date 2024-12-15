@@ -1,6 +1,11 @@
-import PropTypes from "prop-types";
+"use client";
 
-export default function Card({ title, value }) {
+type CardProps = {
+  title: string;
+  value: string;
+};
+
+export default function Card({ title, value }: CardProps) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <h3 className="text-lg font-semibold text-gray-700">{title}</h3>
@@ -8,8 +13,3 @@ export default function Card({ title, value }) {
     </div>
   );
 }
-
-Card.propTypes = {
-  title: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
-};

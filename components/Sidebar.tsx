@@ -1,37 +1,68 @@
-import PropTypes from "prop-types";
-import { FaHome, FaUser, FaCog } from "react-icons/fa";
+"use client";
 
-export default function Sidebar({ isOpen, setIsOpen }) {
+import { FaHome, FaUser, FaCog } from "react-icons/fa";
+import { MdRuleFolder } from "react-icons/md";
+import { RiAdminFill } from "react-icons/ri";
+import SideBarButton from "./SideBarButton";
+
+type SideBarProps = {
+  status:
+    | "dashboard"
+    | "licenceholder"
+    | "rules"
+    | "administration"
+    | "settings";
+  handleDashboard: () => void;
+  handleLicenceHolder: () => void;
+  handleRules: () => void;
+  handleAdministration: () => void;
+  handleSettings: () => void;
+};
+
+export default function Sidebar({
+  status,
+  handleDashboard,
+  handleLicenceHolder,
+  handleRules,
+  handleAdministration,
+  handleSettings,
+}: SideBarProps) {
   return (
-    <div
-      className={`${
-        isOpen ? "w-64" : "w-20"
-      } bg-blue-600 text-white h-full transition-all duration-300`}
-    >
-      <button
-        className="p-4 focus:outline-none"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? "" : ""}
-      </button>
-      <nav className="mt-4">
-        <ul className="space-y-2">
-          <li className="p-2 flex items-center space-x-2">
-            <FaHome /> <span className={isOpen ? "" : "hidden"}>Dashboard</span>
-          </li>
-          <li className="p-2 flex items-center space-x-2">
-            <FaUser /> <span className={isOpen ? "" : "hidden"}>Profile</span>
-          </li>
-          <li className="p-2 flex items-center space-x-2">
-            <FaCog /> <span className={isOpen ? "" : "hidden"}>Settings</span>
-          </li>
+    <div className="bg-white text-black shadow-md h-full flex flex-col transition-all duration-300 w-12 md:w-64">
+      <nav className="mt-4 flex-grow">
+        <ul className="space-y-4">
+          <SideBarButton
+            isActive={status === "dashboard"}
+            text="Dashboard"
+            icon={<FaHome />}
+            onClick={handleDashboard}
+          />
+          <SideBarButton
+            isActive={status === "licenceholder"}
+            text="Licence Holder"
+            icon={<FaUser />}
+            onClick={handleLicenceHolder}
+          />
+          <SideBarButton
+            isActive={status === "rules"}
+            text="Rules"
+            icon={<MdRuleFolder />}
+            onClick={handleRules}
+          />
+          <SideBarButton
+            isActive={status === "administration"}
+            text="Administration"
+            icon={<RiAdminFill />}
+            onClick={handleAdministration}
+          />
+          <SideBarButton
+            isActive={status === "settings"}
+            text="Settings"
+            icon={<FaCog />}
+            onClick={handleSettings}
+          />
         </ul>
       </nav>
     </div>
   );
 }
-
-Sidebar.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  setIsOpen: PropTypes.func.isRequired,
-};
