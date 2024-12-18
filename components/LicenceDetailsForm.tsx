@@ -12,7 +12,7 @@ type mytype = {
   idNumber: string;
   licenceNumber: string;
   permanentAddress: string;
-  vehicleCategories: string[]; // Explicitly typed as an array of strings
+  vehicleCategories: string[];
   issueDatePerCategory: { [key: string]: string };
   expiryDatePerCategory: { [key: string]: string };
 };

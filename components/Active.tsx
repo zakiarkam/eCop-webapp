@@ -10,7 +10,7 @@ export default function Active() {
   >("dashboard");
 
   return (
-    <div className="h-screen flex flex-col">
+    <div className="h-full w-full flex flex-col">
       <Header />
 
       <div className="flex flex-1">
