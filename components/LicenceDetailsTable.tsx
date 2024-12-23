@@ -35,6 +35,20 @@ export default function LicenceDetailsTable() {
     },
   ]);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 5;
+
+  const totalPages = Math.ceil(data.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const currentData = data.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
   const handleEdit = (index: number) => {
     console.log("Edit entry:", data[index]);
   };
@@ -46,53 +60,51 @@ export default function LicenceDetailsTable() {
 
   return (
     <div className="">
-      <div className="w-full bg-white overflow-x-scroll">
-        <table className="w-full border-collapse border border-gray-300">
-          <thead>
+      <div className="overflow-x-auto shadow-md rounded-lg border border-gray-300">
+        <table className="w-full text-sm text-left text-gray-700 border-collapsew-full border-collapse border border-gray-300">
+          <thead className="bg-gray-100 text-gray-700">
             <tr className="bg-gray-100">
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
-                #
-              </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300"></th>
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Full Name
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Name with Initials
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 DOB
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Age
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Permanent Address
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border-gray-300">
                 ID Number
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
-                Licence Number
+              <th className="p-2 text-left text-sm font-bold  border-gray-300">
+                License Number
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Date of Issue
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Date of Expiry
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold  border border-gray-300">
                 Vehicle Categories
               </th>
-              <th className="p-2 text-left text-sm font-bold text-gray-700 border border-gray-300">
+              <th className="p-2 text-left text-sm font-bold border border-gray-300">
                 Actions
               </th>
             </tr>
           </thead>
           <tbody>
-            {data.map((entry, index) => (
+            {currentData.map((entry, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  {index + 1}
+                  {startIndex + index + 1}
                 </td>
                 <td className="p-2 text-sm text-gray-700 border border-gray-300">
                   {entry.fullName}
@@ -154,15 +166,19 @@ export default function LicenceDetailsTable() {
               >
                 <div className="flex justify-between items-center">
                   <button
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
                     className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50"
-                    disabled={false}
                   >
                     Previous
                   </button>
-                  <span className="text-sm text-gray-700">Page 1 of 1</span>
+                  <span className="text-sm text-gray-700">
+                    Page {currentPage} of {totalPages}
+                  </span>
                   <button
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage === totalPages}
                     className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50"
-                    disabled={false}
                   >
                     Next
                   </button>

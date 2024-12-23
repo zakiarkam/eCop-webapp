@@ -11,7 +11,7 @@ export default function Dashboard() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card title="Total Administrators" value="1,245" />
-          <Card title="Total Licence Holder" value="34,550" />
+          <Card title="Total License Holder" value="34,550" />
         </div>
 
         <section className="py-6">

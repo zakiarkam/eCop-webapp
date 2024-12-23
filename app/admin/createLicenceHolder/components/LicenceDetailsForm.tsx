@@ -204,7 +204,7 @@ export default function LicenceDetailsForm() {
     <div className="font-[sans-serif]">
       <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[180px] sm:p-6 p-4">
         <h4 className="sm:text-3xl text-2xl font-bold pt-6 text-white">
-          Add the Details of Licence Holder
+          Add the Details of License Holder
         </h4>
       </div>
 
@@ -275,7 +275,7 @@ export default function LicenceDetailsForm() {
             </div>
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
-                Date of Issue of the licence
+                Date of Issue of the license
               </label>
               <input
                 name="issueDate"
@@ -288,7 +288,7 @@ export default function LicenceDetailsForm() {
             </div>
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
-                Date of Expiry of the licence
+                Date of Expiry of the license
               </label>
               <input
                 name="expiryDate"
@@ -315,7 +315,7 @@ export default function LicenceDetailsForm() {
             </div>
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
-                licence Number
+                license Number
               </label>
               <input
                 name="licenceNumber"
@@ -459,7 +459,7 @@ export default function LicenceDetailsForm() {
             </div>
           )}
 
-          <div className="mt-8">
+          <div className="mt-8 ">
             <button
               type="submit"
               className="py-3 px-6 text-sm tracking-wider font-semibold rounded-md w-full text-white bg-[#15134A] hover:opacity-80"

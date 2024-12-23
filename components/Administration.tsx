@@ -20,7 +20,7 @@ export default function Administration() {
       <div className="mb-2">
         <input
           type="text"
-          placeholder="Search Licence Holder..."
+          placeholder="Search License Holder..."
           value={searchTerm}
           onChange={handleSearchChange}
           className="w-full sm:w-3/4 md:w-2/5 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6DB6FE]"

@@ -50,7 +50,7 @@ export default function UserDataTable() {
         <table className="w-full text-sm text-left text-gray-700 border-collapse">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="px-6 py-3 border border-gray-300">#</th>
+              <th className="px-6 py-3 border border-gray-300"></th>
               <th className="px-6 py-3 border border-gray-300">RMB Name</th>
               <th className="px-6 py-3 border border-gray-300">Email</th>
               <th className="px-6 py-3 border border-gray-300">District</th>
