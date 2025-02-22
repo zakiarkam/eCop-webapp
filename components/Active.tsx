@@ -6,7 +6,7 @@ import Content from "./Content";
 
 export default function Active() {
   const [status, setStatus] = useState<
-    "dashboard" | "licenceholder" | "rules" | "administration" | "settings"
+    "dashboard" | "licenceholder" | "policeofficer" | "rules" | "administration" | "violations" | "settings" 
   >("dashboard");
 
   return (
@@ -18,7 +18,9 @@ export default function Active() {
           status={status}
           handleDashboard={() => setStatus("dashboard")}
           handleLicenceHolder={() => setStatus("licenceholder")}
+          handlePoliceOfficer={() => setStatus("policeofficer")}
           handleRules={() => setStatus("rules")}
+          handleViolations={() => setStatus("violations")}
           handleAdministration={() => setStatus("administration")}
           handleSettings={() => setStatus("settings")}
         />

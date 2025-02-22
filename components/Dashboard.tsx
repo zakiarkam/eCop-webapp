@@ -12,12 +12,14 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card title="Total Administrators" value="1,245" />
           <Card title="Total License Holder" value="34,550" />
+          <Card title="Total Police Officer" value="14,550" />
+
         </div>
 
         <section className="py-6">
           <h2 className="text-lg font-semibold mb-4">Recent Activities</h2>
           <div className="bg-white p-4 rounded-lg shadow-md">
-            This is a placeholder for recent activities.
+            The recent activities.
           </div>
         </section>
       </main>
