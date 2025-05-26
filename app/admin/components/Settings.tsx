@@ -1,11 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import {
-  AiOutlineEdit,
-  AiOutlineCheck,
-  AiFillEdit,
-  AiFillCheckSquare,
-} from "react-icons/ai";
+import { AiFillEdit, AiFillCheckSquare } from "react-icons/ai";
 
 export default function Settings() {
   const [form, setForm] = useState({

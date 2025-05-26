@@ -1,4 +1,4 @@
-import Active from "@/components/Active";
+import Active from "@/app/admin/components/Active";
 import React from "react";
 
 export default function page() {

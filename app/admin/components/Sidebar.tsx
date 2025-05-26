@@ -1,10 +1,10 @@
 "use client";
-
-import { FaHome, FaUser, FaCog, FaFileAlt } from "react-icons/fa";
+import { FaHome, FaUser, FaCog, FaFileAlt, FaBell } from "react-icons/fa";
 import { MdRuleFolder } from "react-icons/md";
 import { RiAdminFill } from "react-icons/ri";
 import SideBarButton from "./SideBarButton";
 import { GiPoliceOfficerHead } from "react-icons/gi";
+import { useSession } from "next-auth/react";
 
 type SideBarProps = {
   status:
@@ -14,7 +14,8 @@ type SideBarProps = {
     | "rules"
     | "violations"
     | "administration"
-    | "settings";
+    | "settings"
+    | "notifications";
   handleDashboard: () => void;
   handleLicenceHolder: () => void;
   handlePoliceOfficer: () => void;
@@ -22,6 +23,7 @@ type SideBarProps = {
   handleViolations: () => void;
   handleAdministration: () => void;
   handleSettings: () => void;
+  handleNotifications: () => void;
 };
 
 export default function Sidebar({
@@ -33,11 +35,22 @@ export default function Sidebar({
   handleAdministration,
   handleViolations,
   handleSettings,
+  handleNotifications,
 }: SideBarProps) {
+  const { data: session } = useSession();
+
   return (
     <div className="bg-white text-black shadow-md h-full flex flex-col transition-all duration-300 w-12 md:w-64">
       <nav className="mt-4 flex-grow">
-        <ul className="space-y-4">
+        <ul className="space-y-1">
+          {session?.user?.role === "admin" && (
+            <SideBarButton
+              isActive={status === "notifications"}
+              text="Notifications"
+              icon={<FaBell />}
+              onClick={handleNotifications}
+            />
+          )}
           <SideBarButton
             isActive={status === "dashboard"}
             text="Dashboard"
@@ -56,25 +69,29 @@ export default function Sidebar({
             icon={<GiPoliceOfficerHead />}
             onClick={handlePoliceOfficer}
           />
-          <SideBarButton
-            isActive={status === "rules"}
-            text="Rules"
-            icon={<MdRuleFolder />}
-            onClick={handleRules}
-          />
+
+          {session?.user?.role === "admin" && (
+            <SideBarButton
+              isActive={status === "rules"}
+              text="Rules"
+              icon={<MdRuleFolder />}
+              onClick={handleRules}
+            />
+          )}
           <SideBarButton
             isActive={status === "violations"}
             text="Violations"
-            icon={<FaFileAlt />
-            }
+            icon={<FaFileAlt />}
             onClick={handleViolations}
           />
-          <SideBarButton
-            isActive={status === "administration"}
-            text="Administration"
-            icon={<RiAdminFill />}
-            onClick={handleAdministration}
-          />
+          {session?.user?.role === "admin" && (
+            <SideBarButton
+              isActive={status === "administration"}
+              text="Administration"
+              icon={<RiAdminFill />}
+              onClick={handleAdministration}
+            />
+          )}
           <SideBarButton
             isActive={status === "settings"}
             text="Settings"

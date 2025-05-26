@@ -1,7 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai"; // Import eye icons
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useSnackbar } from "notistack";
 
 const districtToProvince = {
   Colombo: "Western Province",
@@ -44,9 +45,10 @@ export default function SignUpForm() {
   });
 
   const router = useRouter();
-  const [error, setError] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const validateForm = () => {
     const {
@@ -96,10 +98,12 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      enqueueSnackbar(validationError, { variant: "warning" });
+      setIsSubmitting(false);
       return;
     }
 
@@ -113,12 +117,48 @@ export default function SignUpForm() {
       const data = await response.json();
 
       if (response.ok) {
-        router.push("/auth/login");
+        enqueueSnackbar(
+          "Account created successfully! Please login to continue.",
+          {
+            variant: "success",
+            autoHideDuration: 3000,
+          }
+        );
+
+        // Clear form
+        setForm({
+          rmbname: "",
+          rmbdistrict: "",
+          rmbprovince: "",
+          email: "",
+          mobilenumber: "",
+          password: "",
+          confirmpassword: "",
+          idnumber: "",
+        });
+
+        // Redirect after showing success message
+        setTimeout(() => {
+          router.push("/auth/login");
+        }, 1500);
       } else {
-        setError(data.message || "Something went wrong. Please try again.");
+        enqueueSnackbar(
+          data.message || "Registration failed. Please try again.",
+          {
+            variant: "error",
+          }
+        );
       }
     } catch (err) {
-      setError("Network error. Please check your connection.");
+      console.error("Registration error:", err);
+      enqueueSnackbar(
+        "Network error. Please check your connection and try again.",
+        {
+          variant: "error",
+        }
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -146,10 +186,6 @@ export default function SignUpForm() {
           onSubmit={handleSubmit}
           className="max-w-4xl mx-auto mb-4 bg-white shadow-[0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md"
         >
-          {!!error && (
-            <div className="my-4 text-red-600 text-center">{error}</div>
-          )}
-
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
@@ -158,9 +194,10 @@ export default function SignUpForm() {
               <input
                 name="rmbname"
                 type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Enter Your name"
                 required
+                disabled={isSubmitting}
                 value={form.rmbname}
                 onChange={(e) => setForm({ ...form, rmbname: e.target.value })}
               />
@@ -171,9 +208,10 @@ export default function SignUpForm() {
               <input
                 name="email"
                 type="email"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Enter email"
                 required
+                disabled={isSubmitting}
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
@@ -185,8 +223,9 @@ export default function SignUpForm() {
               </label>
               <select
                 name="rmbdistrict"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 required
+                disabled={isSubmitting}
                 value={form.rmbdistrict}
                 onChange={handleDistrictChange}
               >
@@ -207,7 +246,7 @@ export default function SignUpForm() {
               </label>
               <input
                 type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Province will be displayed here"
                 value={form.rmbprovince}
                 readOnly
@@ -221,9 +260,10 @@ export default function SignUpForm() {
               <input
                 name="mobilenumber"
                 type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Enter mobile number"
                 required
+                disabled={isSubmitting}
                 value={form.mobilenumber}
                 onChange={(e) =>
                   setForm({ ...form, mobilenumber: e.target.value })
@@ -238,9 +278,10 @@ export default function SignUpForm() {
               <input
                 name="idnumber"
                 type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Enter ID number"
                 required
+                disabled={isSubmitting}
                 value={form.idnumber}
                 onChange={(e) => setForm({ ...form, idnumber: e.target.value })}
               />
@@ -253,9 +294,10 @@ export default function SignUpForm() {
               <input
                 name="password"
                 type={passwordVisible ? "text" : "password"}
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Enter password"
                 required
+                disabled={isSubmitting}
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
@@ -278,9 +320,10 @@ export default function SignUpForm() {
               <input
                 name="confirmpassword"
                 type={confirmPasswordVisible ? "text" : "password"}
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE]transition-all"
+                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
                 placeholder="Confirm password"
                 required
+                disabled={isSubmitting}
                 value={form.confirmpassword}
                 onChange={(e) =>
                   setForm({ ...form, confirmpassword: e.target.value })
@@ -304,10 +347,25 @@ export default function SignUpForm() {
           <div className="mt-8">
             <button
               type="submit"
-              className="py-3 px-6 text-sm tracking-wider font-semibold rounded-md w-full text-white bg-[#15134A] hover:opacity-80"
+              disabled={isSubmitting}
+              className="py-3 px-6 text-sm tracking-wider font-semibold rounded-md w-full text-white bg-[#15134A] hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              Sign up
+              {isSubmitting ? "Creating Account..." : "Sign up"}
             </button>
+          </div>
+
+          <div className="mt-4 text-center">
+            <p className="text-gray-600 text-sm">
+              Already have an account?{" "}
+              <button
+                type="button"
+                onClick={() => router.push("/auth/login")}
+                className="text-[#6DB6FE] hover:text-[#15134A] font-semibold underline"
+                disabled={isSubmitting}
+              >
+                Login here
+              </button>
+            </p>
           </div>
         </form>
       </div>

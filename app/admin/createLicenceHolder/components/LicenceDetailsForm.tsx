@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { AiOutlineArrowDown } from "react-icons/ai";
 type mytype = {
   fullName: string;
@@ -33,7 +32,6 @@ export default function LicenceDetailsForm() {
   });
 
   const [error, setError] = useState("");
-  const router = useRouter();
 
   const vehicleOptions = [
     "A1",

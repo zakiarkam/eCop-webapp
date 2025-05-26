@@ -6,7 +6,14 @@ import Content from "./Content";
 
 export default function Active() {
   const [status, setStatus] = useState<
-    "dashboard" | "licenceholder" | "policeofficer" | "rules" | "administration" | "violations" | "settings" 
+    | "dashboard"
+    | "licenceholder"
+    | "policeofficer"
+    | "rules"
+    | "administration"
+    | "violations"
+    | "settings"
+    | "notifications"
   >("dashboard");
 
   return (
@@ -23,6 +30,7 @@ export default function Active() {
           handleViolations={() => setStatus("violations")}
           handleAdministration={() => setStatus("administration")}
           handleSettings={() => setStatus("settings")}
+          handleNotifications={() => setStatus("notifications")}
         />
 
         <main className="p-6 space-y-6 flex-1 bg-gray-100">

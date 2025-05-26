@@ -56,11 +56,16 @@ export async function POST(request: Request) {
       mobilenumber,
       idnumber,
       password: hashedPassword,
+      role: "rmvAdmin",
+      isApproved: false,
     });
 
     await newUser.save();
     return NextResponse.json(
-      { message: "User created successfully" },
+      {
+        message:
+          "User created successfully, Your account requires approval before you can login.",
+      },
       { status: 201 }
     );
   } catch (error: any) {

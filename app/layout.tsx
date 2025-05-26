@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./providers";
 
 const geistSans = localFont({
   src: "../public/fonts/GeistVF.woff",
@@ -33,7 +34,8 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap"
           rel="stylesheet"
         />
-        {children}
+
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

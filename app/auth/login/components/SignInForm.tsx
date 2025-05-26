@@ -1,15 +1,16 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { useSnackbar } from "notistack";
 
 export default function SignInForm() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [pending, setPending] = useState(false);
-  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const { enqueueSnackbar } = useSnackbar();
 
   const router = useRouter();
 
@@ -17,18 +18,46 @@ export default function SignInForm() {
     e.preventDefault();
     setPending(true);
 
-    const response = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-    if (response?.ok) {
-      router.push("/home");
-    } else if (response?.status === 401) {
-      setError("Invalid Credentials");
-      setPending(false);
-    } else {
-      setError("Something went wrong");
+    try {
+      const response = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
+      });
+
+      if (response?.ok) {
+        enqueueSnackbar("Login successful! Redirecting...", {
+          variant: "success",
+          autoHideDuration: 2000,
+        });
+
+        // Get the session to check approval status
+        const session = await getSession();
+
+        setTimeout(() => {
+          if (session?.user?.needsApproval) {
+            router.push("/pendingApproval");
+          } else if (session?.user?.isApproved) {
+            router.push("/admin");
+          } else {
+            router.push("/admin");
+          }
+        }, 1000);
+      } else if (response?.status === 401) {
+        enqueueSnackbar("Invalid email or password. Please try again.", {
+          variant: "error",
+        });
+      } else {
+        enqueueSnackbar("Login failed. Please try again later.", {
+          variant: "error",
+        });
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      enqueueSnackbar("An unexpected error occurred. Please try again.", {
+        variant: "error",
+      });
+    } finally {
       setPending(false);
     }
   };
@@ -60,10 +89,6 @@ export default function SignInForm() {
             <h3 className="text-[#15134A] text-3xl font-extrabold mb-8">
               Sign in
             </h3>
-
-            {!!error && (
-              <div className="my-4 text-red-600 text-center">{error}</div>
-            )}
 
             <div className="space-y-4">
               <div>
@@ -135,9 +160,9 @@ export default function SignInForm() {
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full shadow-xl py-2.5 px-4 text-sm font-semibold rounded text-white bg-[#15134A] hover:opacity-30 focus:outline-none"
+                className="w-full shadow-xl py-2.5 px-4 text-sm font-semibold rounded text-white bg-[#15134A] hover:opacity-30 focus:outline-none disabled:opacity-50"
               >
-                Log in
+                {pending ? "Logging in..." : "Log in"}
               </button>
             </div>
           </form>

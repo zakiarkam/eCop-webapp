@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import Table from "./LicenceDetailsTable";
-import LicenceDetailsForm from "../app/admin/createLicenceHolder/components/LicenceDetailsForm";
 import Link from "next/link";
 
 export default function LicenceHolder() {

@@ -1,16 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import {
-  FaUserCircle,
-  FaUser,
-  FaCog,
-  FaSignOutAlt,
-  FaBell,
-} from "react-icons/fa";
+import { FaUserCircle, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
 import Image from "next/image";
-import logo from "../public/ecop.svg";
-import { useRouter } from "next/router";
+import logo from "../../../public/ecop.svg";
 import { Notifications } from "./Notifications";
 
 export default function Header() {

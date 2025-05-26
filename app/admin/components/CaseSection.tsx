@@ -32,10 +32,6 @@ export default function CaseSection() {
   const rowsPerPage = 5;
 
   const totalPages = Math.ceil(finesData.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const currentData = finesData.slice(startIndex, endIndex);
-
   const handlePageChange = (page: number) => {
     if (page > 0 && page <= totalPages) {
       setCurrentPage(page);

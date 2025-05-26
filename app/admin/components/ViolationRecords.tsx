@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import ViolationRecordTable from "./ViolationRecordTable";
-import Link from "next/link";
 
 const policeStations = [
   "Colombo Central",
@@ -41,7 +40,7 @@ export default function ViolationRecords() {
           onChange={handleSearchChange}
           className="w-full sm:w-1/2 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6DB6FE]"
         />
-        
+
         <select
           value={selectedStation}
           onChange={handleStationChange}
@@ -57,7 +56,7 @@ export default function ViolationRecords() {
       </div>
 
       <div className="py-4">
-        <ViolationRecordTable 
+        <ViolationRecordTable
           searchTerm={searchTerm}
           selectedStation={selectedStation}
         />
