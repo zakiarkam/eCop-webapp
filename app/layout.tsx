@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { Providers } from "./providers";
+import { Providers } from "../lib/context/providers";
+import { UserProvider } from "@/lib/context/UserContext";
+import Header from "./components/Header";
 
 const geistSans = localFont({
   src: "../public/fonts/GeistVF.woff",
@@ -35,7 +37,13 @@ export default function RootLayout({
           rel="stylesheet"
         />
 
-        <Providers>{children}</Providers>
+        <Providers>
+          {" "}
+          <UserProvider>
+            <Header />
+            <main>{children}</main>
+          </UserProvider>
+        </Providers>
       </body>
     </html>
   );

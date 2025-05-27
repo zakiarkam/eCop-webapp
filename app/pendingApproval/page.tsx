@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import React, { useEffect, useState, useRef } from "react";
+import { signOut } from "next-auth/react";
 import {
   Clock,
   AlertCircle,
@@ -14,9 +14,10 @@ import {
 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/context/UserContext";
 
 export default function PendingApproval() {
-  const { data: session, status } = useSession();
+  const { user, isLoading, isAuthenticated } = useUser();
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -24,19 +25,20 @@ export default function PendingApproval() {
   const [userRejected, setUserRejected] = useState(false);
   const [checkingStatus, setCheckingStatus] = useState(false);
 
-  const checkUserStatus = async () => {
-    if (!session?.user?.email || checkingStatus) return;
+  const welcomeMessageShown = useRef(false);
+  const approvalMessageShown = useRef(false);
 
+  const checkUserStatus = async () => {
+    if (!user?.email || checkingStatus) return;
     setCheckingStatus(true);
     try {
-      const response = await fetch("/api/user/status", {
+      const response = await fetch("/api/other/user/status", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: session.user.email }),
+        body: JSON.stringify({ email: user.email }),
       });
-
       if (response.ok) {
         const data = await response.json();
         if (!data.exists) {
@@ -48,6 +50,10 @@ export default function PendingApproval() {
               autoHideDuration: 5000,
             }
           );
+          // Navigate to login after showing rejection message
+          setTimeout(() => {
+            router.push("/auth/login");
+          }, 3000);
         }
       }
     } catch (error) {
@@ -58,46 +64,48 @@ export default function PendingApproval() {
   };
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user && !userRejected) {
+    if (
+      isAuthenticated &&
+      user &&
+      !userRejected &&
+      !isLoading &&
+      !welcomeMessageShown.current &&
+      !user.isApproved
+    ) {
+      welcomeMessageShown.current = true;
       enqueueSnackbar(
-        `Welcome ${
-          session.user.name || session.user.email
-        }! Your account is pending approval.`,
+        `Welcome ${user.email}! Your account is pending approval.`,
         {
           variant: "info",
           autoHideDuration: 5000,
         }
       );
-
-      // Check user status after a short delay
       setTimeout(() => {
         checkUserStatus();
       }, 1000);
     }
-  }, [status, session, enqueueSnackbar]);
+  }, [isAuthenticated, user, userRejected, isLoading]);
 
   useEffect(() => {
-    if (session?.user?.isApproved && !session?.user?.needsApproval) {
+    if (user?.isApproved && !approvalMessageShown.current) {
+      approvalMessageShown.current = true;
       enqueueSnackbar("Great news! Your account has been approved!", {
         variant: "success",
         autoHideDuration: 3000,
       });
-
       setTimeout(() => {
         router.push("/admin");
       }, 2000);
     }
-  }, [session, enqueueSnackbar, router]);
+  }, [user, enqueueSnackbar, router]);
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
-
     try {
       enqueueSnackbar("Signing out...", {
         variant: "info",
         autoHideDuration: 2000,
       });
-
       await signOut({ callbackUrl: "/auth/login" });
     } catch (error) {
       enqueueSnackbar("Error signing out. Please try again.", {
@@ -108,8 +116,8 @@ export default function PendingApproval() {
   };
 
   const handleCopyEmail = () => {
-    if (session?.user?.email) {
-      navigator.clipboard.writeText(session.user.email);
+    if (user?.email) {
+      navigator.clipboard.writeText(user.email);
       enqueueSnackbar("Email copied to clipboard", {
         variant: "success",
         autoHideDuration: 2000,
@@ -132,7 +140,6 @@ export default function PendingApproval() {
       variant: "info",
       autoHideDuration: 2000,
     });
-
     setTimeout(() => {
       router.push("/auth/login");
     }, 1000);
@@ -146,11 +153,25 @@ export default function PendingApproval() {
     }, 2000);
   };
 
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="font-[sans-serif] h-screen overflow-x-auto bg-white">
+        <div className="flex flex-col mt-16 items-center justify-center py-6 px-4">
+          <div className="text-center">
+            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-[#15134A]" />
+            <p className="text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // If user is rejected, show rejection message
   if (userRejected) {
     return (
-      <div className="font-[sans-serif] bg-white">
-        <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4">
+      <div className="font-[sans-serif] h-screen overflow-x-auto bg-white">
+        <div className="flex flex-col mt-16 items-center justify-center py-6 px-4">
           <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
             <div>
               <h2 className="lg:text-5xl text-4xl font-extrabold lg:leading-[55px] text-red-800">
@@ -158,9 +179,9 @@ export default function PendingApproval() {
               </h2>
               <p className="text-sm mt-6 text-gray-800">
                 Unfortunately, your account application has been reviewed and
-                rejected by the administrator.
+                rejected by the administrator. You will be redirected to the
+                login page shortly.
               </p>
-
               <div className="mt-6 bg-red-50 border border-red-200 rounded-md p-4">
                 <div className="flex items-start">
                   <XCircle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
@@ -175,7 +196,6 @@ export default function PendingApproval() {
                   </div>
                 </div>
               </div>
-
               <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
                 <div className="flex items-start">
                   <Mail className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
@@ -191,7 +211,6 @@ export default function PendingApproval() {
                 </div>
               </div>
             </div>
-
             <div className="ml-auto w-full">
               <div className="bg-white rounded-lg border justify-center border-gray-200 p-8 shadow-md">
                 <div className="text-center mb-8">
@@ -205,7 +224,6 @@ export default function PendingApproval() {
                     Your account application has been rejected
                   </p>
                 </div>
-
                 <div className="space-y-6">
                   <div className="bg-red-50 rounded-md p-4">
                     <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
@@ -228,7 +246,6 @@ export default function PendingApproval() {
                       </li>
                     </ul>
                   </div>
-
                   <div className="bg-blue-50 rounded-md p-4">
                     <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
                       <Mail className="h-4 w-4 mr-2 text-blue-600" />
@@ -245,7 +262,6 @@ export default function PendingApproval() {
                       Contact Administrator
                     </button>
                   </div>
-
                   <div className="space-y-3 pt-4">
                     <button
                       onClick={handleSignOut}
@@ -255,7 +271,6 @@ export default function PendingApproval() {
                       <LogOut className="h-4 w-4 mr-2" />
                       {isSigningOut ? "Signing Out..." : "Sign Out"}
                     </button>
-
                     <button
                       onClick={handleBackToLogin}
                       className="w-full py-2.5 px-4 text-sm font-semibold rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors"
@@ -273,8 +288,8 @@ export default function PendingApproval() {
   }
 
   return (
-    <div className="font-[sans-serif] bg-white">
-      <div className="min-h-screen flex flex-col items-center justify-center py-6 px-4">
+    <div className="font-[sans-serif] h-screen overflow-x-auto bg-white">
+      <div className="flex flex-col mt-16 items-center justify-center py-6 px-4">
         <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
           <div>
             <h2 className="lg:text-5xl text-4xl font-extrabold lg:leading-[55px] text-gray-800">
@@ -284,9 +299,8 @@ export default function PendingApproval() {
               Your account has been created successfully and is currently
               awaiting administrator approval for secure access to the system.
             </p>
-
-            {session?.user && (
-              <div className="mt-6 bg-blue-50 border border-blue-200 rounded-md p-4">
+            {user && (
+              <div className="mt-4 bg-blue-50 border border-blue-200 rounded-md p-3">
                 <div className="flex items-start">
                   <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
                   <div className="flex-1">
@@ -294,14 +308,9 @@ export default function PendingApproval() {
                       Account Details
                     </p>
                     <div className="space-y-1">
-                      {session.user.name && (
-                        <p className="text-sm text-blue-700">
-                          Name: {session.user.name}
-                        </p>
-                      )}
                       <div className="flex items-center space-x-2">
                         <p className="text-sm text-blue-700">
-                          Email: {session.user.email}
+                          Email: {user.email}
                         </p>
                         <button
                           onClick={handleCopyEmail}
@@ -311,12 +320,12 @@ export default function PendingApproval() {
                           <Copy className="h-3 w-3" />
                         </button>
                       </div>
+                      <p className="text-sm text-blue-700">Role: {user.role}</p>
                     </div>
                   </div>
                 </div>
               </div>
             )}
-
             <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-md p-4">
               <div className="flex items-start">
                 <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
@@ -332,12 +341,11 @@ export default function PendingApproval() {
               </div>
             </div>
           </div>
-
-          <div className="ml-auto w-full">
-            <div className="bg-white rounded-lg border justify-center border-gray-200 p-8 shadow-md">
-              <div className="text-center mb-8">
+          <div className="ml-auto w-full ">
+            <div className="bg-white rounded-lg border justify-center border-gray-200 p-6 shadow-md">
+              <div className="text-center mb-6">
                 <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-[#15134A] mb-4">
-                  <Clock className="h-8 w-8 text-white" />
+                  <Clock className="h-6 w-6 text-white" />
                 </div>
                 <h3 className="text-[#15134A] text-3xl font-extrabold mb-2">
                   Pending Approval
@@ -346,7 +354,6 @@ export default function PendingApproval() {
                   Please wait while we review your account
                 </p>
               </div>
-
               <div className="space-y-6">
                 <div className="bg-gray-50 rounded-md p-4">
                   <h4 className="font-semibold text-gray-800 mb-3 flex items-center">
@@ -368,7 +375,6 @@ export default function PendingApproval() {
                     </li>
                   </ul>
                 </div>
-
                 <div className="bg-blue-50 rounded-md p-4">
                   <h4 className="font-semibold text-gray-800 mb-2 flex items-center">
                     <Mail className="h-4 w-4 mr-2 text-blue-600" />
@@ -385,7 +391,6 @@ export default function PendingApproval() {
                     Contact Administrator
                   </button>
                 </div>
-
                 <div className="space-y-3 pt-4">
                   <button
                     onClick={handleRefreshStatus}
@@ -401,7 +406,6 @@ export default function PendingApproval() {
                       ? "Checking..."
                       : "Check Status"}
                   </button>
-
                   <button
                     onClick={handleSignOut}
                     disabled={isSigningOut}
@@ -409,13 +413,6 @@ export default function PendingApproval() {
                   >
                     <LogOut className="h-4 w-4 mr-2" />
                     {isSigningOut ? "Signing Out..." : "Sign Out"}
-                  </button>
-
-                  <button
-                    onClick={handleBackToLogin}
-                    className="w-full py-2.5 px-4 text-sm font-semibold rounded text-[#15134A] bg-gray-100 hover:bg-gray-200 focus:outline-none transition-colors"
-                  >
-                    Back to Login
                   </button>
                 </div>
               </div>

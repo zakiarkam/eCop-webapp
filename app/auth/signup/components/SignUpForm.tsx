@@ -174,9 +174,9 @@ export default function SignUpForm() {
   const sortedDistricts = Object.keys(districtToProvince).sort();
 
   return (
-    <div className="font-[sans-serif]">
-      <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[180px] sm:p-6 p-4">
-        <h4 className="sm:text-3xl text-2xl font-bold pt-6 text-white">
+    <div className="font-[sans-serif]  ">
+      <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[200px] sm:p-6 p-4">
+        <h4 className="sm:text-3xl text-2xl font-bold pt-14 text-white">
           Create your Secured account
         </h4>
       </div>

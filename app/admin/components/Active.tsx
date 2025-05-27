@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Header from "./Header";
+import Header from "../../components/Header";
 import Sidebar from "./Sidebar";
 import Content from "./Content";
 
@@ -17,10 +17,8 @@ export default function Active() {
   >("dashboard");
 
   return (
-    <div className="h-full w-full flex flex-col">
-      <Header />
-
-      <div className="flex flex-1">
+    <div className="h-screen w-full flex flex-col">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar
           status={status}
           handleDashboard={() => setStatus("dashboard")}
@@ -33,7 +31,7 @@ export default function Active() {
           handleNotifications={() => setStatus("notifications")}
         />
 
-        <main className="p-6 space-y-6 flex-1 bg-gray-100">
+        <main className="p-6 space-y-6 flex-1 bg-gray-100 overflow-auto">
           <Content status={status} />
         </main>
       </div>
