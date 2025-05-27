@@ -1,10 +1,11 @@
 "use client";
+
 import { FaHome, FaUser, FaCog, FaFileAlt, FaBell } from "react-icons/fa";
 import { MdRuleFolder } from "react-icons/md";
 import { RiAdminFill } from "react-icons/ri";
 import SideBarButton from "./SideBarButton";
 import { GiPoliceOfficerHead } from "react-icons/gi";
-import { useSession } from "next-auth/react";
+import { useUser } from "../.../../../../lib/context/UserContext";
 
 type SideBarProps = {
   status:
@@ -37,13 +38,39 @@ export default function Sidebar({
   handleSettings,
   handleNotifications,
 }: SideBarProps) {
-  const { data: session } = useSession();
+  const { user, isAuthenticated, isLoading } = useUser();
+
+  if (isLoading) {
+    return (
+      <div className="bg-white text-black shadow-md h-full flex flex-col transition-all duration-300 w-12 md:w-64">
+        <nav className="mt-4 flex-grow">
+          <ul className="space-y-1">
+            {[...Array(6)].map((_, index) => (
+              <li key={index} className="px-4 py-3">
+                <div className="flex items-center space-x-3">
+                  <div className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="hidden md:block w-24 h-4 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return null;
+  }
+
+  const isAdmin = user.role === "admin";
+  const isApproved = user.isApproved;
 
   return (
     <div className="bg-white text-black shadow-md h-full flex flex-col transition-all duration-300 w-12 md:w-64">
-      <nav className="mt-4 flex-grow">
+      <nav className="mt-16 flex-grow">
         <ul className="space-y-1">
-          {session?.user?.role === "admin" && (
+          {isAdmin && (
             <SideBarButton
               isActive={status === "notifications"}
               text="Notifications"
@@ -57,20 +84,23 @@ export default function Sidebar({
             icon={<FaHome />}
             onClick={handleDashboard}
           />
-          <SideBarButton
-            isActive={status === "licenceholder"}
-            text="Licence Holder"
-            icon={<FaUser />}
-            onClick={handleLicenceHolder}
-          />
-          <SideBarButton
-            isActive={status === "policeofficer"}
-            text="Police Officer"
-            icon={<GiPoliceOfficerHead />}
-            onClick={handlePoliceOfficer}
-          />
-
-          {session?.user?.role === "admin" && (
+          {isApproved && (
+            <SideBarButton
+              isActive={status === "licenceholder"}
+              text="Licence Holder"
+              icon={<FaUser />}
+              onClick={handleLicenceHolder}
+            />
+          )}
+          {isApproved && (
+            <SideBarButton
+              isActive={status === "policeofficer"}
+              text="Police Officer"
+              icon={<GiPoliceOfficerHead />}
+              onClick={handlePoliceOfficer}
+            />
+          )}
+          {isAdmin && (
             <SideBarButton
               isActive={status === "rules"}
               text="Rules"
@@ -78,20 +108,22 @@ export default function Sidebar({
               onClick={handleRules}
             />
           )}
-          <SideBarButton
-            isActive={status === "violations"}
-            text="Violations"
-            icon={<FaFileAlt />}
-            onClick={handleViolations}
-          />
-          {session?.user?.role === "admin" && (
+          {isApproved && (
+            <SideBarButton
+              isActive={status === "violations"}
+              text="Violations"
+              icon={<FaFileAlt />}
+              onClick={handleViolations}
+            />
+          )}
+          {isAdmin && (
             <SideBarButton
               isActive={status === "administration"}
               text="Administration"
               icon={<RiAdminFill />}
               onClick={handleAdministration}
             />
-          )}
+          )}{" "}
           <SideBarButton
             isActive={status === "settings"}
             text="Settings"
@@ -100,6 +132,16 @@ export default function Sidebar({
           />
         </ul>
       </nav>
+
+      {user.role === "rmvAdmin" && !user.isApproved && (
+        <div className="p-4 border-t border-gray-200">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <p className="text-xs text-yellow-800 text-center">
+              Account Pending Approval
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -24,7 +24,7 @@ type ContentProps = {
 
 export default function Content({ status }: ContentProps) {
   return (
-    <div className="w-full">
+    <div className="w-full pt-12">
       {status === "notifications" && <PendingUsersManagement />}
       {status === "dashboard" && <Dashboard />}
       {status === "licenceholder" && <LicenceHolder />}

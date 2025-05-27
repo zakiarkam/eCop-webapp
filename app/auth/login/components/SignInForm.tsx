@@ -37,10 +37,17 @@ export default function SignInForm() {
         setTimeout(() => {
           if (session?.user?.needsApproval) {
             router.push("/pendingApproval");
-          } else if (session?.user?.isApproved) {
-            router.push("/admin");
+          } else if (session?.user?.isApproved && session.user?.id) {
+            router.push(`/admin/${session.user.id}`);
+          } else if (session?.user?.id) {
+            router.push(`/admin/${session.user.id}`);
           } else {
-            router.push("/admin");
+            enqueueSnackbar(
+              "Session error: Unable to retrieve user information.",
+              {
+                variant: "error",
+              }
+            );
           }
         }, 1000);
       } else if (response?.status === 401) {
@@ -63,8 +70,8 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="font-[sans-serif]">
-      <div className="min-h-screen flex fle-col items-center justify-center py-6 px-4">
+    <div className="font-[sans-serif] ">
+      <div className="  flex fle-col items-center justify-center py-6 px-4">
         <div className="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
           <div>
             <h2 className="lg:text-5xl text-4xl font-extrabold lg:leading-[55px] text-gray-800">

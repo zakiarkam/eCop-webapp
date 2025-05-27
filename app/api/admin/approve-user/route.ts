@@ -17,7 +17,6 @@ export async function POST(request: Request) {
     await connectToDatabase();
 
     if (approved) {
-      // Approve the user
       await User.findByIdAndUpdate(userId, {
         isApproved: true,
         approvedAt: new Date(),

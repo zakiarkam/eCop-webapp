@@ -103,7 +103,7 @@ export default function PoliceOfficerDetailsForm() {
 
     // Phone number validation (Sri Lankan format)
     const phoneRegex = /^(?:\+94|0)?[0-9]{9}$/;
-    if (!phoneRegex.test(phoneNumber.replace(/\s/g, ''))) {
+    if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
       return "Please enter a valid phone number.";
     }
 
@@ -180,8 +180,8 @@ export default function PoliceOfficerDetailsForm() {
 
   return (
     <div className="font-[sans-serif]">
-      <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[180px] sm:p-6 p-4">
-        <h4 className="sm:text-3xl text-2xl font-bold pt-6 text-white">
+      <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[200px] sm:p-6 p-4">
+        <h4 className="sm:text-3xl text-2xl mt-8 font-bold pt-6 text-white">
           Add Police Officer Details
         </h4>
       </div>
@@ -191,7 +191,9 @@ export default function PoliceOfficerDetailsForm() {
           onSubmit={handleSubmit}
           className="max-w-4xl mx-auto mb-4 bg-white shadow-[0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md"
         >
-          {error && <div className="my-4 text-red-600 text-center">{error}</div>}
+          {error && (
+            <div className="my-4 text-red-600 text-center">{error}</div>
+          )}
 
           <div className="grid md:grid-cols-2 gap-8">
             <div>
@@ -325,7 +327,9 @@ export default function PoliceOfficerDetailsForm() {
             </div>
 
             <div>
-              <label className="text-gray-800 text-sm mb-2 block">District</label>
+              <label className="text-gray-800 text-sm mb-2 block">
+                District
+              </label>
               <select
                 name="district"
                 className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
@@ -343,7 +347,9 @@ export default function PoliceOfficerDetailsForm() {
             </div>
 
             <div>
-              <label className="text-gray-800 text-sm mb-2 block">Province</label>
+              <label className="text-gray-800 text-sm mb-2 block">
+                Province
+              </label>
               <input
                 name="province"
                 type="text"
