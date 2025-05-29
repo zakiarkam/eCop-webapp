@@ -91,7 +91,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
         type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -181,7 +180,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  RMB Name *
+                  RMV Name *
                 </label>
                 <input
                   type="text"
@@ -304,7 +303,6 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end space-x-3 pt-6 border-t">
               <button
                 type="button"

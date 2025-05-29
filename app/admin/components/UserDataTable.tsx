@@ -54,7 +54,6 @@ export default function UserDataTable({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fetch data from API
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -220,12 +219,12 @@ export default function UserDataTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto shadow-md rounded-lg border border-gray-300">
+      <div className="overflow-x-auto shadow-md rounded-sm ">
         <table className="w-full text-sm text-left text-gray-700 border-collapse">
-          <thead className="bg-gray-100 text-gray-700">
+          <thead className="bg-gray-200 text-gray-700">
             <tr>
-              <th className="px-6 py-3 border border-gray-300">#</th>
-              <th className="px-6 py-3 border border-gray-300">RMB Name</th>
+              <th className="px-6 py-3 border border-gray-300">No</th>
+              <th className="px-6 py-3 border border-gray-300">RMV Name</th>
               <th className="px-6 py-3 border border-gray-300">Email</th>
               <th className="px-6 py-3 border border-gray-300">District</th>
               <th className="px-6 py-3 border border-gray-300">Mobile</th>
@@ -319,7 +318,6 @@ export default function UserDataTable({
               ))
             )}
 
-            {/* Pagination Row */}
             {totalPages > 1 && (
               <tr className="bg-gray-100">
                 <td colSpan={10} className="px-6 py-3">

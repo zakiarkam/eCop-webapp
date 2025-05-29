@@ -303,7 +303,6 @@ export default function PendingUsersManagement() {
           </div>
         </div>
 
-        {/* Search and Bulk Actions */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="relative">
@@ -342,7 +341,8 @@ export default function PendingUsersManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           {loading && pendingUsers.length === 0 ? (
             <div className="p-12 text-center">
-              <RefreshCw className="h-8 w-8 animate-spin text-blue-500 mx-auto mb-4" />
+              <div className="animate-spin rounded-full mx-auto mb-4 h-8 w-8 border-b-2 border-blue-500"></div>
+
               <p className="text-gray-500">Loading pending users...</p>
             </div>
           ) : filteredUsers.length === 0 ? (

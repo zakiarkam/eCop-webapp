@@ -23,7 +23,6 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6">
-          {/* Warning Icon */}
           <div className="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 rounded-full mb-4">
             <svg
               className="w-8 h-8 text-red-600"
@@ -39,13 +38,9 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
               />
             </svg>
           </div>
-
-          {/* Title */}
           <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
             Delete User Account
           </h3>
-
-          {/* Message */}
           <div className="text-sm text-gray-600 text-center mb-6">
             <p className="mb-2">
               Are you sure you want to delete this user account?
@@ -58,9 +53,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
               This action cannot be undone. All user data will be permanently
               removed.
             </p>
-          </div>
-
-          {/* Action Buttons */}
+          </div>{" "}
           <div className="flex space-x-3">
             <button
               onClick={onCancel}

@@ -189,7 +189,7 @@ export default function SignUpForm() {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
-                RMB Name
+                RMV Name
               </label>
               <input
                 name="rmbname"
@@ -219,7 +219,7 @@ export default function SignUpForm() {
 
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
-                RMB District
+                RMV District
               </label>
               <select
                 name="rmbdistrict"
@@ -242,7 +242,7 @@ export default function SignUpForm() {
 
             <div>
               <label className="text-gray-800 text-sm mb-2 block">
-                RMB Province
+                RMV Province
               </label>
               <input
                 type="text"
