@@ -58,10 +58,9 @@ export default function Settings() {
 
   if (isLoading || loading) {
     return (
-      <div className="font-[sans-serif] w-full p-4 bg-gray-100">
-        <div className="flex justify-center items-center h-64">
-          <div className="text-gray-600">Loading user details...</div>
-        </div>
+      <div className="p-12 text-center">
+        <div className="animate-spin rounded-full mx-auto mb-4 h-8 w-8 border-b-2 border-blue-500"></div>
+        <p className="text-gray-500">Loading...</p>
       </div>
     );
   }
@@ -99,7 +98,7 @@ export default function Settings() {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <label className="text-gray-800 text-sm mb-2 block font-semibold">
-                RMB Name
+                RMV Name
               </label>
               <div className="bg-gray-50 w-full text-sm text-gray-800 px-4 py-3 rounded-md border">
                 {userDetails.rmbname || "Not provided"}
@@ -126,7 +125,7 @@ export default function Settings() {
 
             <div>
               <label className="text-gray-800 text-sm mb-2 block font-semibold">
-                RMB District
+                RMV District
               </label>
               <div className="bg-gray-50 w-full text-sm text-gray-800 px-4 py-3 rounded-md border">
                 {userDetails.rmbdistrict || "Not provided"}
