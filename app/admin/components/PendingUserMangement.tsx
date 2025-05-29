@@ -276,7 +276,6 @@ export default function PendingUsersManagement() {
   return (
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
-        {/* Header Section */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <div>
@@ -340,7 +339,6 @@ export default function PendingUsersManagement() {
           </div>
         </div>
 
-        {/* Users List */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200">
           {loading && pendingUsers.length === 0 ? (
             <div className="p-12 text-center">
@@ -374,7 +372,7 @@ export default function PendingUsersManagement() {
                   key={pendingUser._id}
                   className="p-6 hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex  lg:flex-row gap-4 flex-col justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="bg-blue-100 rounded-full p-3">
                         <User className="h-6 w-6 text-blue-600" />
@@ -413,7 +411,7 @@ export default function PendingUsersManagement() {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center lg:ml-0 ml-16 space-x-3">
                       <button
                         onClick={() =>
                           handleUserApproval(
