@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import EditUserModal from "./modal/editUser";
-import DeleteConfirmationModal from "./modal/deleteUser";
 import { Edit, Trash2 } from "lucide-react";
 import { enqueueSnackbar, useSnackbar } from "notistack";
+import DeleteConfirmationModal from "./modal/deleteModal";
 
 type UserData = {
   id: string;
@@ -93,7 +93,6 @@ export default function UserDataTable({
         user.rmbname.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.rmbdistrict.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.rmbprovince.toLowerCase().includes(searchTerm.toLowerCase()) ||
         user.mobilenumber.includes(searchTerm) ||
         user.idnumber.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -388,11 +387,17 @@ export default function UserDataTable({
 
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
-        userName={userToDelete?.name || ""}
-        userEmail={userToDelete?.email || ""}
+        title="Delete User Account"
+        description="Are you sure you want to delete this user account?"
+        item={{
+          primaryText: userToDelete?.name || "",
+          secondaryText: userToDelete?.email || "",
+        }}
         onConfirm={handleDeleteConfirm}
         onCancel={handleDeleteCancel}
         loading={deleteLoading}
+        confirmButtonText="Delete User"
+        warningText="This action cannot be undone. All user data will be permanently removed."
       />
     </div>
   );

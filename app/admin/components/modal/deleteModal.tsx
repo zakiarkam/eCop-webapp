@@ -1,21 +1,33 @@
 import React from "react";
 
+interface DeleteItem {
+  primaryText: string;
+  secondaryText?: string;
+  additionalInfo?: string;
+}
+
 interface DeleteConfirmationModalProps {
   isOpen: boolean;
-  userName: string;
-  userEmail: string;
+  title: string;
+  description: string;
+  item: DeleteItem;
   onConfirm: () => void;
   onCancel: () => void;
   loading?: boolean;
+  confirmButtonText?: string;
+  warningText?: string;
 }
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
   isOpen,
-  userName,
-  userEmail,
+  title,
+  description,
+  item,
   onConfirm,
   onCancel,
   loading = false,
+  confirmButtonText = "Delete",
+  warningText = "This action cannot be undone. All data will be permanently removed.",
 }) => {
   if (!isOpen) return null;
 
@@ -39,21 +51,23 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
-            Delete User Account
+            {title}
           </h3>
           <div className="text-sm text-gray-600 text-center mb-6">
-            <p className="mb-2">
-              Are you sure you want to delete this user account?
-            </p>
+            <p className="mb-2">{description}</p>
             <div className="bg-gray-50 p-3 rounded-lg">
-              <p className="font-medium text-gray-900">{userName}</p>
-              <p className="text-gray-600">{userEmail}</p>
+              <p className="font-medium text-gray-900">{item.primaryText}</p>
+              {item.secondaryText && (
+                <p className="text-gray-600">{item.secondaryText}</p>
+              )}
+              {item.additionalInfo && (
+                <p className="text-gray-500 text-xs mt-1">
+                  {item.additionalInfo}
+                </p>
+              )}
             </div>
-            <p className="mt-3 text-red-600 font-medium">
-              This action cannot be undone. All user data will be permanently
-              removed.
-            </p>
-          </div>{" "}
+            <p className="mt-3 text-red-600 font-medium">{warningText}</p>
+          </div>
           <div className="flex space-x-3">
             <button
               onClick={onCancel}
@@ -67,7 +81,7 @@ const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({
               className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50"
               disabled={loading}
             >
-              {loading ? "Deleting..." : "Delete User"}
+              {loading ? "Deleting..." : confirmButtonText}
             </button>
           </div>
         </div>

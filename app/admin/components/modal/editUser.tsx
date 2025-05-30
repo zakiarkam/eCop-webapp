@@ -180,7 +180,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  RMV Name *
+                  RMV Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -199,7 +199,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
+                  Email <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -216,10 +216,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 )}
               </div>
 
-              {/* District */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  District *
+                  District <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="rmbdistrict"
@@ -246,7 +245,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Mobile Number *
+                  Mobile Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -266,10 +265,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 )}
               </div>
 
-              {/* ID Number */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ID Number *
+                  ID Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"

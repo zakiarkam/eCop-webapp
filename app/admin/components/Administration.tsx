@@ -27,7 +27,7 @@ export default function Administration() {
   };
 
   return (
-    <div className="w-full p-4 bg-gray-100 min-h-screen">
+    <div className="w-full p-4 bg-gray-100 ">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex flex-wrap justify-between items-center mb-6">
           <h2 className="text-xl sm:text-2xl font-semibold text-[#15134A]">
@@ -53,7 +53,6 @@ export default function Administration() {
               />
             </div>
 
-            {/* Role Filter */}
             <div className="min-w-[150px]">
               <label
                 htmlFor="role"
@@ -73,7 +72,6 @@ export default function Administration() {
               </select>
             </div>
 
-            {/* Approval Filter */}
             <div className="min-w-[150px]">
               <label
                 htmlFor="approval"
@@ -93,7 +91,6 @@ export default function Administration() {
               </select>
             </div>
 
-            {/* Clear Filters Button */}
             <div>
               <button
                 onClick={clearFilters}
@@ -104,19 +101,7 @@ export default function Administration() {
             </div>
           </div>
 
-          {/* Active Filters Display */}
           <div className="flex flex-wrap gap-2">
-            {searchTerm && (
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                Search: "{searchTerm}"
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="ml-2 text-blue-600 hover:text-blue-800"
-                >
-                  ×
-                </button>
-              </span>
-            )}
             {roleFilter && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
                 Role: {roleFilter}
