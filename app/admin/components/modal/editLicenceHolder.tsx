@@ -335,11 +335,11 @@ export default function EditLicenceModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed bg-black bg-opacity-50 inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0 p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className=" bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="fixed inset-0 transition-opacity  " onClick={onClose} />
 
-        <div className="inline-block w-full max-w-4xl p-8 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl  rounded-lg">
+        <div className="inline-block w-full max-w-4xl p-8  overflow-hidden text-left align-middle transition-all transform ">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-xl font-semibold text-gray-900">
               Edit Licence

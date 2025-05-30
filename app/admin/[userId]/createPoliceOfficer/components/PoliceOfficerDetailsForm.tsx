@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
+import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/context/UserContext";
 
 const districtToProvince = {
   Colombo: "Western Province",
@@ -30,7 +32,7 @@ const districtToProvince = {
   Puttalam: "North-Western Province",
 };
 
-type PoliceOfficerForm = {
+type PoliceOfficerFormType = {
   fullName: string;
   nameWithInitials: string;
   dob: string;
@@ -43,11 +45,28 @@ type PoliceOfficerForm = {
   policeStation: string;
   badgeNo: string;
   phoneNumber: string;
-  email: string;
+  rank: string;
+  joiningDate: string;
+  bloodGroup: string;
 };
 
+interface ApiResponse {
+  message: string;
+  officer?: {
+    id: string;
+    fullName: string;
+    policeNumber: string;
+    badgeNo: string;
+  };
+  errors?: string[];
+}
+
 export default function PoliceOfficerDetailsForm() {
-  const [form, setForm] = useState<PoliceOfficerForm>({
+  const { enqueueSnackbar } = useSnackbar();
+  const router = useRouter();
+  const { user } = useUser();
+
+  const [form, setForm] = useState<PoliceOfficerFormType>({
     fullName: "",
     nameWithInitials: "",
     dob: "",
@@ -60,17 +79,34 @@ export default function PoliceOfficerDetailsForm() {
     policeStation: "",
     badgeNo: "",
     phoneNumber: "",
-    email: "",
+    rank: "",
+    joiningDate: "",
+    bloodGroup: "",
   });
 
-  const [error, setError] = useState("");
-  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  const rankOptions = [
+    "Inspector General of Police (IGP)",
+    "Deputy Inspector General (DIG)",
+    "Senior Superintendent of Police (SSP)",
+    "Superintendent of Police (SP)",
+    "Assistant Superintendent of Police (ASP)",
+    "Chief Inspector (CI)",
+    "Inspector (IP)",
+    "Sub Inspector (SI)",
+    "Police Sergeant (PS)",
+    "Police Constable (PC)",
+  ];
+
+  const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
   const validateForm = () => {
     const {
       fullName,
       nameWithInitials,
       dob,
+      age,
       policeNumber,
       idNumber,
       permanentAddress,
@@ -78,13 +114,16 @@ export default function PoliceOfficerDetailsForm() {
       policeStation,
       badgeNo,
       phoneNumber,
-      email,
+      rank,
+      joiningDate,
+      bloodGroup,
     } = form;
 
     if (
       !fullName ||
       !nameWithInitials ||
       !dob ||
+      !age ||
       !policeNumber ||
       !idNumber ||
       !permanentAddress ||
@@ -92,7 +131,9 @@ export default function PoliceOfficerDetailsForm() {
       !policeStation ||
       !badgeNo ||
       !phoneNumber ||
-      !email
+      !rank ||
+      !joiningDate ||
+      !bloodGroup
     ) {
       return "All fields are required.";
     }
@@ -105,12 +146,6 @@ export default function PoliceOfficerDetailsForm() {
     const phoneRegex = /^(?:\+94|0)?[0-9]{9}$/;
     if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
       return "Please enter a valid phone number.";
-    }
-
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return "Please enter a valid email address.";
     }
 
     return null;
@@ -135,30 +170,85 @@ export default function PoliceOfficerDetailsForm() {
     }));
   };
 
+  const submitToAPI = async (
+    formData: PoliceOfficerFormType
+  ): Promise<ApiResponse> => {
+    const response = await fetch("/api/other/policeOfficer/createOfficer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    return result;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate form
     const validationError = validateForm();
     if (validationError) {
-      setError(validationError);
+      enqueueSnackbar(validationError, { variant: "error" });
       return;
     }
 
+    setLoading(true);
+
     try {
-      const response = await fetch("/api/police/officer/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+      const result = await submitToAPI(form);
+
+      enqueueSnackbar(
+        `Police Officer created successfully! Officer ID: ${result.officer?.id}`,
+        { variant: "success" }
+      );
+
+      setForm({
+        fullName: "",
+        nameWithInitials: "",
+        dob: "",
+        age: "",
+        policeNumber: "",
+        idNumber: "",
+        permanentAddress: "",
+        district: "",
+        province: "",
+        policeStation: "",
+        badgeNo: "",
+        phoneNumber: "",
+        rank: "",
+        joiningDate: "",
+        bloodGroup: "",
       });
 
-      const data = await response.json();
+      console.log("Police Officer created successfully:", result);
+      setTimeout(() => {
+        router.push(`/admin/${user?.id}`);
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error submitting police officer:", error);
 
-      if (response.ok) {
-        router.push("/dashboard"); // Adjust the route as needed
+      if (error.message) {
+        enqueueSnackbar(error.message, { variant: "error" });
       } else {
-        setError(data.message || "Something went wrong. Please try again.");
+        enqueueSnackbar(
+          "Failed to submit police officer details. Please try again.",
+          {
+            variant: "error",
+          }
+        );
       }
-    } catch (err) {
-      setError("Network error. Please check your connection.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -171,7 +261,9 @@ export default function PoliceOfficerDetailsForm() {
     });
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
@@ -179,226 +271,266 @@ export default function PoliceOfficerDetailsForm() {
   const sortedDistricts = Object.keys(districtToProvince).sort();
 
   return (
-    <div className="font-[sans-serif]">
-      <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[200px] sm:p-6 p-4">
-        <h4 className="sm:text-3xl text-2xl mt-8 font-bold pt-6 text-white">
-          Add Police Officer Details
+    <div className="font-sans">
+      <div className="text-center bg-gradient-to-r from-[#15134A] to-[#6DB6FE] min-h-[200px] p-6">
+        <h4 className="text-3xl mt-8 font-bold pt-6 text-white">
+          Add the Details of Police Officer
         </h4>
       </div>
 
       <div className="mx-4 mb-4 -mt-16">
-        <form
-          onSubmit={handleSubmit}
-          className="max-w-4xl mx-auto mb-4 bg-white shadow-[0_2px_13px_-6px_rgba(0,0,0,0.4)] sm:p-8 p-4 rounded-md"
-        >
-          {error && (
-            <div className="my-4 text-red-600 text-center">{error}</div>
-          )}
+        <div className="max-w-4xl mx-auto mb-4 bg-white shadow-lg p-8 rounded-md">
+          <form onSubmit={handleSubmit}>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="fullName"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter your full name"
+                  value={form.fullName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Full Name
-              </label>
-              <input
-                name="fullName"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter full name"
-                value={form.fullName}
-                onChange={handleChange}
-                required
-              />
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Name with Initials <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="nameWithInitials"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter your name with initials"
+                  value={form.nameWithInitials}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Date of Birth <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="dob"
+                  type="date"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.dob}
+                  onChange={handleDobChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Age <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="age"
+                  type="number"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter your age"
+                  value={form.age}
+                  onChange={handleChange}
+                  required
+                  readOnly
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Blood Group <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="bloodGroup"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.bloodGroup}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Blood Group</option>
+                  {bloodGroupOptions.map((group) => (
+                    <option key={group} value={group}>
+                      {group}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Police Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="policeNumber"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter police number"
+                  value={form.policeNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  ID Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="idNumber"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter ID number"
+                  value={form.idNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Badge Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="badgeNo"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter badge number"
+                  value={form.badgeNo}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Phone Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="phoneNumber"
+                  type="tel"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter phone number"
+                  value={form.phoneNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Permanent Address <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="permanentAddress"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter your permanent address"
+                  value={form.permanentAddress}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  District <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="district"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.district}
+                  onChange={handleDistrictChange}
+                  required
+                >
+                  <option value="">Select district</option>
+                  {sortedDistricts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Province <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="province"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.province}
+                  readOnly
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Police Station <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="policeStation"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter police station"
+                  value={form.policeStation}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Rank <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="rank"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.rank}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Rank</option>
+                  {rankOptions.map((rank) => (
+                    <option key={rank} value={rank}>
+                      {rank}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Joining Date <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="joiningDate"
+                  type="date"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.joiningDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Name with Initials
-              </label>
-              <input
-                name="nameWithInitials"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter name with initials"
-                value={form.nameWithInitials}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Date of Birth
-              </label>
-              <input
-                name="dob"
-                type="date"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                value={form.dob}
-                onChange={handleDobChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">Age</label>
-              <input
-                name="age"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                value={form.age}
-                readOnly
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Phone Number
-              </label>
-              <input
-                name="phoneNumber"
-                type="tel"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter phone number"
-                value={form.phoneNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Email Address
-              </label>
-              <input
-                name="email"
-                type="email"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter email address"
-                value={form.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Police Number
-              </label>
-              <input
-                name="policeNumber"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter police number"
-                value={form.policeNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                ID Number
-              </label>
-              <input
-                name="idNumber"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter ID number"
-                value={form.idNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Permanent Address
-              </label>
-              <input
-                name="permanentAddress"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter permanent address"
-                value={form.permanentAddress}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                District
-              </label>
-              <select
-                name="district"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                value={form.district}
-                onChange={handleDistrictChange}
-                required
+            <div className="mt-8">
+              <button
+                type="submit"
+                disabled={loading}
+                className="py-3 px-6 text-sm tracking-wider font-semibold rounded-md w-full text-white bg-[#15134A] hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
-                <option value="">Select district</option>
-                {sortedDistricts.map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
+                {loading ? "Submitting..." : "Submit"}
+              </button>
             </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Province
-              </label>
-              <input
-                name="province"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                value={form.province}
-                readOnly
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Police Station
-              </label>
-              <input
-                name="policeStation"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter police station"
-                value={form.policeStation}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="text-gray-800 text-sm mb-2 block">
-                Badge Number
-              </label>
-              <input
-                name="badgeNo"
-                type="text"
-                className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-[#6DB6FE] transition-all"
-                placeholder="Enter badge number"
-                value={form.badgeNo}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="mt-8">
-            <button
-              type="submit"
-              className="py-3 px-6 text-sm tracking-wider font-semibold rounded-md w-full text-white bg-[#15134A] hover:opacity-80"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
