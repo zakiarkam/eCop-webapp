@@ -1,9 +1,15 @@
+"use client";
 import React, { useState } from "react";
 import PoliceOfficerTable from "./PoliceOfficerTable";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/context/UserContext";
 
 export default function LicenceHolder() {
   const [searchTerm, setSearchTerm] = useState("");
+  const { user } = useUser();
+
+  const router = useRouter();
 
   const handleSearchChange = (e: {
     target: { value: React.SetStateAction<string> };
@@ -17,8 +23,13 @@ export default function LicenceHolder() {
         <h2 className="text-xl sm:text-2xl font-semibold text-[#15134A]">
           Police Officer Details
         </h2>
-        <button className="bg-[#6DB6FE] hover:opacity-35 text-white px-4 py-2 rounded shadow">
-          <Link href="/admin/createPoliceOfficer">Add Police Officer</Link>
+        <button
+          className="bg-[#6DB6FE] hover:opacity-35 text-white px-4 py-2 rounded shadow"
+          onClick={() => {
+            router.push(`/admin/${user?.id}/createPoliceOfficer`);
+          }}
+        >
+          Add Police Officer
         </button>
       </div>
 
