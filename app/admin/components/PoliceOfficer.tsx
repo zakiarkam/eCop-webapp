@@ -20,9 +20,9 @@ export default function PoliceOfficer() {
     <div className="w-full p-4 bg-gray-100">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex flex-wrap justify-between items-center mb-4">
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#15134A]">
+          <h4 className="text-xl  font-semibold text-[#15134A]">
             Police Officer Details
-          </h2>
+          </h4>
           <button
             className="bg-[#6DB6FE] hover:opacity-35 text-white px-4 py-2 rounded shadow"
             onClick={() => {

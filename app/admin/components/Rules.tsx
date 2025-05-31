@@ -5,9 +5,9 @@ export default function Rules() {
   return (
     <div className="w-full p-4 bg-gray-100">
       <div className="flex flex-wrap justify-between items-center mb-4">
-        <h2 className="text-xl sm:text-2xl font-semibold text-[#15134A]">
+        <h4 className="text-xl  font-semibold text-[#15134A]">
           Traffic Rules Details
-        </h2>
+        </h4>
       </div>
       <div className="py-2">
         <FinesTable />

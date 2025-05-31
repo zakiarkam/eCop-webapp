@@ -279,9 +279,9 @@ export default function PendingUsersManagement() {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
           <div className="flex flex-col sm:flex-row items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">
+              <h4 className="text-xl font-bold text-gray-900">
                 Pending User Approvals
-              </h1>
+              </h4>
               <p className="text-gray-600 mt-1">
                 Review and manage user registration requests
               </p>

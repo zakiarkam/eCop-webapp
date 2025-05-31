@@ -30,9 +30,9 @@ export default function Administration() {
     <div className="w-full p-4 bg-gray-100 ">
       <div className="bg-white rounded-lg shadow-sm p-6">
         <div className="flex flex-wrap justify-between items-center mb-6">
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#15134A]">
+          <h4 className="text-xl  font-semibold  text-[#15134A]">
             User Management
-          </h2>
+          </h4>
         </div>{" "}
         <div className="mb-6 space-y-4">
           <div className="flex flex-wrap gap-4 items-end">
