@@ -83,7 +83,7 @@ export default function Header() {
 
       {isAuthenticated && user && (
         <div className="flex items-center space-x-4">
-          <div className="relative" ref={notificationRef}>
+          {/* <div className="relative" ref={notificationRef}>
             <button
               className="flex items-center space-x-2 mx-4 relative"
               onClick={() => setIsNotificationOpen(!isNotificationOpen)}
@@ -95,7 +95,7 @@ export default function Header() {
                 <Notifications />
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="relative" ref={dropdownRef}>
             <button

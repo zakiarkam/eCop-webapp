@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { FaPencilAlt, FaTrash } from "react-icons/fa";
+import { Edit, Trash2 } from "lucide-react";
 
 type ViolationRecord = {
   username: string;
@@ -22,7 +22,10 @@ interface ViolationRecordsTableProps {
   selectedStation: string;
 }
 
-export default function ViolationRecordsTable({ searchTerm, selectedStation }: ViolationRecordsTableProps) {
+export default function ViolationRecordsTable({
+  searchTerm,
+  selectedStation,
+}: ViolationRecordsTableProps) {
   const [data] = useState<ViolationRecord[]>([
     {
       username: "John Doe",
@@ -36,7 +39,7 @@ export default function ViolationRecordsTable({ searchTerm, selectedStation }: V
       policeStation: "Colombo Central",
       violationArea: "Galle Road, Colombo 03",
       violationDate: "2024-02-22",
-      status: "Pending"
+      status: "Pending",
     },
     {
       username: "Jane Smith",
@@ -50,7 +53,7 @@ export default function ViolationRecordsTable({ searchTerm, selectedStation }: V
       policeStation: "Kandy Central",
       violationArea: "Peradeniya Road, Kandy",
       violationDate: "2024-02-21",
-      status: "Paid"
+      status: "Paid",
     },
   ]);
 
@@ -58,14 +61,15 @@ export default function ViolationRecordsTable({ searchTerm, selectedStation }: V
   const rowsPerPage = 5;
 
   // Filter data based on search term and selected station
-  const filteredData = data.filter(record => {
-    const matchesSearch = searchTerm === "" || 
+  const filteredData = data.filter((record) => {
+    const matchesSearch =
+      searchTerm === "" ||
       record.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.policeNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStation = selectedStation === "" || 
-      record.policeStation === selectedStation;
+
+    const matchesStation =
+      selectedStation === "" || record.policeStation === selectedStation;
 
     return matchesSearch && matchesStation;
   });
@@ -100,109 +104,181 @@ export default function ViolationRecordsTable({ searchTerm, selectedStation }: V
     }
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
   return (
-    <div className="">
-      <div className="overflow-x-auto shadow-md rounded-lg border border-gray-300">
-        <table className="w-full text-sm text-left text-gray-700 border-collapse border border-gray-300">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">#</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Date</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">User Details</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Vehicle Info</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Violation Details</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Police Details</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Location</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Fine Status</th>
-              <th className="p-2 text-left text-sm font-bold border border-gray-300">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.map((record, index) => (
-              <tr key={index} className="hover:bg-gray-50">
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  {startIndex + index + 1}
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  {new Date(record.violationDate).toLocaleDateString()}
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  <div>
-                    <div className="font-medium">{record.username}</div>
-                    <div>{record.licenseNumber}</div>
-                    <div>{record.mobileNumber}</div>
-                  </div>
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  {record.vehicleNumber}
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  <div>
-                    <div>Act: {record.sectionOfAct}</div>
-                    <div>Violation: {record.provision}</div>
-                    <div className="font-medium">Fine: Rs. {record.fineAmount.toLocaleString()}</div>
-                  </div>
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  <div>
-                    <div>{record.policeNumber}</div>
-                    <div>{record.policeStation}</div>
-                  </div>
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  {record.violationArea}
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(record.status)}`}>
-                    {record.status}
-                  </span>
-                </td>
-                <td className="p-2 text-sm text-gray-700 border border-gray-300">
-                  <div className="flex space-x-2">
-                    <button
-                      className="text-blue-500 hover:text-blue-700"
-                      onClick={() => handleEdit(index)}
+    <div className="font-sans">
+      <div className="mb-4">
+        <div className="max-w-full mx-auto bg-white rounded-sm shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-700 border-collapse">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-6 py-3 border font-semibold">No</th>
+                  <th className="px-6 py-3 border font-semibold">Date</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    User Details
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Vehicle Info
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Violation Details
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Police Details
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">Location</th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Fine Status
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentData.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={9}
+                      className="px-6 py-8 text-center text-gray-500"
                     >
-                      <FaPencilAlt />
-                    </button>
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => handleDelete(index)}
+                      {searchTerm || selectedStation
+                        ? "No violation records found matching your search."
+                        : "No violation records found."}
+                    </td>
+                  </tr>
+                ) : (
+                  currentData.map((record, index) => (
+                    <tr
+                      key={index}
+                      className="hover:bg-gray-50 transition-colors"
                     >
-                      <FaTrash />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            <tr className="bg-gray-100">
-              <td
-                colSpan={9}
-                className="p-2 text-center text-sm text-gray-700 border border-gray-300"
-              >
-                <div className="flex justify-between items-center">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-700">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50"
-                  >
-                    Next
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                      <td className="px-6 py-4 border font-medium">
+                        {startIndex + index + 1}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {formatDate(record.violationDate)}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div>
+                          <div className="font-medium">{record.username}</div>
+                          <div className="text-gray-600">
+                            {record.licenseNumber}
+                          </div>
+                          <div className="text-gray-600">
+                            {record.mobileNumber}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border font-medium">
+                        {record.vehicleNumber}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div>
+                          <div className="text-gray-600">
+                            Act: {record.sectionOfAct}
+                          </div>
+                          <div className="text-gray-600">
+                            Violation: {record.provision}
+                          </div>
+                          <div className="font-medium text-red-600">
+                            Fine: Rs. {record.fineAmount.toLocaleString()}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div>
+                          <div className="font-medium">
+                            {record.policeNumber}
+                          </div>
+                          <div className="text-gray-600">
+                            {record.policeStation}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {record.violationArea}
+                      </td>
+                      <td className="px-6 py-4 border text-center">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                            record.status
+                          )}`}
+                        >
+                          {record.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(index)}
+                            className="text-[#6DB6FE] hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
+                            title="Edit Violation Record"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(index)}
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors"
+                            title="Delete Violation Record"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+
+              {filteredData.length > 0 && (
+                <tfoot>
+                  <tr className="bg-gray-100">
+                    <td colSpan={9} className="px-6 py-3">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                          Showing {startIndex + 1} to{" "}
+                          {Math.min(endIndex, filteredData.length)} of{" "}
+                          {filteredData.length} violation records
+                          {(searchTerm || selectedStation) &&
+                            ` (filtered from ${data.length} total)`}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-sm text-gray-600">
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
