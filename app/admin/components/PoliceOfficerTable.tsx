@@ -217,15 +217,6 @@ export default function PoliceOfficerTable({
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2">Loading police officers...</span>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -235,188 +226,175 @@ export default function PoliceOfficerTable({
   }
 
   return (
-    <div className="font-[sans-serif] p-4">
-      <div className="mb-4 flex justify-between items-center">
-        <div className="text-sm text-gray-600">
-          Showing {currentData.length} of {filteredData.length} police officers
-          {searchTerm && ` (filtered from ${data.length} total)`}
-        </div>
-      </div>
-
-      <div className="overflow-x-auto shadow-md rounded-sm">
-        <table className="w-full text-sm text-left text-gray-700 border-collapse">
-          <thead className="bg-gray-200 text-gray-700">
-            <tr>
-              <th className="px-6 py-3 border border-gray-300">No</th>
-              <th className="px-6 py-3 border border-gray-300">Full Name</th>
-              <th className="px-6 py-3 border border-gray-300">
-                Name with Initials
-              </th>
-              <th className="px-6 py-3 border border-gray-300">
-                Police Number
-              </th>
-              <th className="px-6 py-3 border border-gray-300">Badge No</th>
-              <th className="px-6 py-3 border border-gray-300">Rank</th>
-              <th className="px-6 py-3 border border-gray-300">
-                Police Station
-              </th>
-              <th className="px-6 py-3 border border-gray-300">District</th>
-              <th className="px-6 py-3 border border-gray-300">Province</th>
-              <th className="px-6 py-3 border border-gray-300">Phone Number</th>
-              <th className="px-6 py-3 border border-gray-300">Blood Group</th>
-              <th className="px-6 py-3 border border-gray-300">DOB</th>
-              <th className="px-6 py-3 border border-gray-300">Age</th>
-              <th className="px-6 py-3 border border-gray-300">Joining Date</th>
-              <th className="px-6 py-3 border border-gray-300">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={15}
-                  className="px-6 py-8 text-center text-gray-500"
-                >
-                  {searchTerm
-                    ? "No police officers found matching your search."
-                    : "No police officers found."}
-                </td>
-              </tr>
-            ) : (
-              currentData.map((officer, index) => (
-                <tr
-                  key={officer._id}
-                  className="hover:bg-gray-50 odd:bg-white even:bg-gray-50"
-                >
-                  <td className="px-6 py-3 border border-gray-300">
-                    {startIndex + index + 1}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300 font-medium">
-                    {officer.fullName}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {officer.nameWithInitials}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300 font-medium">
-                    {officer.policeNumber}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      {officer.badgeNo}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {officer.rank}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {officer.policeStation}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {officer.district}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {officer.province}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {officer.phoneNumber}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      {officer.bloodGroup}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 border whitespace-nowrap border-gray-300">
-                    {formatDate(officer.dob)}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {officer.age}
-                  </td>
-                  <td className="px-6 py-3 border whitespace-nowrap border-gray-300">
-                    {formatDate(officer.joiningDate)}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(officer)}
-                        className="flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        title="Edit Officer"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(officer)}
-                        className="flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                        title="Delete Officer"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
+    <div className="font-sans">
+      <div className="mb-4">
+        <div className="max-w-full mx-auto bg-white rounded-sm shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-700 border-collapse">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-6 py-3 border font-semibold">No</th>
+                  <th className="px-6 py-3 border font-semibold">Full Name</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Name with Initials
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Police Number
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">Badge No</th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Rank
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Police Station
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">District</th>
+                  <th className="px-6 py-3 border font-semibold">Province</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Phone Number
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Blood Group
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">DOB</th>
+                  <th className="px-6 py-3 border font-semibold">Age</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Joining Date
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Actions
+                  </th>
                 </tr>
-              ))
-            )}
-
-            {totalPages > 1 && (
-              <tr className="bg-gray-100">
-                <td colSpan={15} className="px-6 py-3">
-                  <div className="flex justify-between items-center">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Previous
-                    </button>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <div className="flex space-x-1">
-                        {Array.from(
-                          { length: Math.min(5, totalPages) },
-                          (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                              pageNum = i + 1;
-                            } else {
-                              const start = Math.max(1, currentPage - 2);
-                              const end = Math.min(totalPages, start + 4);
-                              pageNum = start + i;
-                              if (pageNum > end) return null;
-                            }
-
-                            return (
-                              <button
-                                key={pageNum}
-                                onClick={() => handlePageChange(pageNum)}
-                                className={`px-3 py-1 text-sm rounded ${
-                                  currentPage === pageNum
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-white text-gray-700 hover:bg-gray-100"
-                                }`}
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          }
-                        )}
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={15} className="px-6 py-8 text-center">
+                      <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span className="ml-2">Loading police officers...</span>
                       </div>
-                    </div>
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    </td>
+                  </tr>
+                ) : currentData.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={15}
+                      className="px-6 py-8 text-center text-gray-500"
                     >
-                      Next
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                      {searchTerm
+                        ? "No police officers found matching your search."
+                        : "No police officers found."}
+                    </td>
+                  </tr>
+                ) : (
+                  currentData.map((officer, index) => (
+                    <tr
+                      key={officer._id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 border font-medium">
+                        {startIndex + index + 1}
+                      </td>
+                      <td className="px-6 py-4 border font-medium">
+                        {officer.fullName}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {officer.nameWithInitials}
+                      </td>
+                      <td className="px-6 py-4 border font-medium">
+                        {officer.policeNumber}
+                      </td>
+                      <td className="px-6 py-4 border">{officer.badgeNo}</td>
+                      <td className="px-6 py-4 border text-center">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {officer.rank}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {officer.policeStation}
+                      </td>
+                      <td className="px-6 py-4 border">{officer.district}</td>
+                      <td className="px-6 py-4 border">{officer.province}</td>
+                      <td className="px-6 py-4 border">
+                        {officer.phoneNumber}
+                      </td>
+                      <td className="px-6 py-4 border text-center">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          {officer.bloodGroup}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {formatDate(officer.dob)}
+                      </td>
+                      <td className="px-6 py-4 border">{officer.age}</td>
+                      <td className="px-6 py-4 border">
+                        {formatDate(officer.joiningDate)}
+                      </td>
+                      <td className="px-6 py-4 border text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(officer)}
+                            className="text-[#6DB6FE] hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
+                            title="Edit Officer"
+                            disabled={loading}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(officer)}
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors"
+                            title="Delete Officer"
+                            disabled={loading}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+
+              {filteredData.length > 0 && (
+                <tfoot>
+                  <tr className="bg-gray-100">
+                    <td colSpan={15} className="px-6 py-3">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                          Showing {startIndex + 1} to{" "}
+                          {Math.min(endIndex, filteredData.length)} of{" "}
+                          {filteredData.length} police officers
+                          {searchTerm &&
+                            ` (filtered from ${data.length} total)`}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-sm text-gray-600">
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </div>
       </div>
 
       {isEditModalOpen && officerToEdit && (
