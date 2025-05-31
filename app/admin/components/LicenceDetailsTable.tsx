@@ -214,15 +214,6 @@ export default function LicenceDetailsTable({
     });
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
-        <span className="ml-2">Loading licences...</span>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -232,205 +223,194 @@ export default function LicenceDetailsTable({
   }
 
   return (
-    <div className="font-[sans-serif] p-4">
-      <div className="mb-4 flex justify-between items-center">
-        <div className="text-sm text-gray-600">
-          Showing {currentData.length} of {filteredData.length} licences
-          {searchTerm && ` (filtered from ${data.length} total)`}
-        </div>
-      </div>
-
-      <div className="overflow-x-auto shadow-md rounded-sm">
-        <table className="w-full text-sm text-left text-gray-700 border-collapse">
-          <thead className="bg-gray-200 text-gray-700">
-            <tr>
-              <th className="px-6 py-3 border border-gray-300">No</th>
-              <th className="px-6 py-3 border border-gray-300">Full Name</th>
-              <th className="px-6 py-3 border border-gray-300">
-                Name with Initials
-              </th>
-              <th className="px-6 py-3 border border-gray-300">DOB</th>
-              <th className="px-6 py-3 border border-gray-300">Age</th>
-              <th className="px-6 py-3 border border-gray-300">Blood Group</th>
-              <th className="px-6 py-3 border border-gray-300">
-                Current Address
-              </th>
-              <th className="px-6 py-3 border border-gray-300">ID Number</th>
-              <th className="px-6 py-3 border border-gray-300">
-                Licence Number
-              </th>
-              <th className="px-6 py-3 border border-gray-300">Issue Date</th>
-              <th className="px-6 py-3 border border-gray-300">Expiry Date</th>
-              <th className="px-6 py-3 border border-gray-300">
-                Vehicle Categories
-              </th>
-              <th className="px-6 py-3 border border-gray-300">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentData.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={13}
-                  className="px-6 py-8 text-center text-gray-500"
-                >
-                  {searchTerm
-                    ? "No licences found matching your search."
-                    : "No licences found."}
-                </td>
-              </tr>
-            ) : (
-              currentData.map((entry, index) => (
-                <tr
-                  key={entry._id}
-                  className="hover:bg-gray-50 odd:bg-white even:bg-gray-50"
-                >
-                  <td className="px-6 py-3 border border-gray-300">
-                    {startIndex + index + 1}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300 font-medium">
-                    {entry.fullName}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {entry.nameWithInitials}
-                  </td>
-                  <td className="px-6 py-3 border  whitespace-nowrap border-gray-300">
-                    {formatDate(entry.dob)}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {entry.age}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      {entry.bloodGroup}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <div
-                      className="max-w-xs truncate"
-                      title={entry.currentAddress}
-                    >
-                      {entry.currentAddress}
-                    </div>
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    {entry.idNumber}
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300 font-medium">
-                    {entry.licenceNumber}
-                  </td>
-                  <td className="px-6 py-3 border  whitespace-nowrap border-gray-300">
-                    {formatDate(entry.issueDate)}
-                  </td>
-                  <td className="px-6 py-3 border  whitespace-nowrap border-gray-300">
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        new Date(entry.expiryDate) > new Date()
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {formatDate(entry.expiryDate)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <div className="space-y-2">
-                      {entry.vehicleCategories.map((vc, idx) => (
-                        <div key={idx} className="text-xs">
-                          <div className="flex items-center space-x-2">
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">
-                              {vc.category}
-                            </span>
-                            <span className="text-gray-500 whitespace-nowrap">
-                              {formatDate(vc.issueDate)} -{" "}
-                              {formatDate(vc.expiryDate)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-3 border border-gray-300">
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleEdit(entry)}
-                        className="flex items-center justify-center w-8 h-8 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-                        title="Edit Licence"
-                      >
-                        <Edit size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteClick(entry)}
-                        className="flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                        title="Delete Licence"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  </td>
+    <div className="font-sans">
+      <div className="mb-4">
+        <div className="max-w-full mx-auto bg-white rounded-sm shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left text-gray-700 border-collapse">
+              <thead className="bg-gray-100 text-gray-700">
+                <tr>
+                  <th className="px-6 py-3 border font-semibold">No</th>
+                  <th className="px-6 py-3 border font-semibold">Full Name</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Name with Initials
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">DOB</th>
+                  <th className="px-6 py-3 border font-semibold">Age</th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Blood Group
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Current Address
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">ID Number</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Licence Number
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">Issue Date</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Expiry Date
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Vehicle Categories
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Actions
+                  </th>
                 </tr>
-              ))
-            )}
-
-            {totalPages > 1 && (
-              <tr className="bg-gray-100">
-                <td colSpan={13} className="px-6 py-3">
-                  <div className="flex justify-between items-center">
-                    <button
-                      onClick={() => handlePageChange(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Previous
-                    </button>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-sm text-gray-600">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <div className="flex space-x-1">
-                        {Array.from(
-                          { length: Math.min(5, totalPages) },
-                          (_, i) => {
-                            let pageNum;
-                            if (totalPages <= 5) {
-                              pageNum = i + 1;
-                            } else {
-                              const start = Math.max(1, currentPage - 2);
-                              const end = Math.min(totalPages, start + 4);
-                              pageNum = start + i;
-                              if (pageNum > end) return null;
-                            }
-
-                            return (
-                              <button
-                                key={pageNum}
-                                onClick={() => handlePageChange(pageNum)}
-                                className={`px-3 py-1 text-sm rounded ${
-                                  currentPage === pageNum
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-white text-gray-700 hover:bg-gray-100"
-                                }`}
-                              >
-                                {pageNum}
-                              </button>
-                            );
-                          }
-                        )}
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={13} className="px-6 py-8 text-center">
+                      <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <span className="ml-2">Loading licences...</span>
                       </div>
-                    </div>
-                    <button
-                      onClick={() => handlePageChange(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    </td>
+                  </tr>
+                ) : currentData.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={13}
+                      className="px-6 py-8 text-center text-gray-500"
                     >
-                      Next
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                      {searchTerm
+                        ? "No licences found matching your search."
+                        : "No licences found."}
+                    </td>
+                  </tr>
+                ) : (
+                  currentData.map((entry, index) => (
+                    <tr
+                      key={entry._id}
+                      className="hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="px-6 py-4 border font-medium">
+                        {startIndex + index + 1}
+                      </td>
+                      <td className="px-6 py-4 border font-medium">
+                        {entry.fullName}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {entry.nameWithInitials}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {formatDate(entry.dob)}
+                      </td>
+                      <td className="px-6 py-4 border">{entry.age}</td>
+                      <td className="px-6 py-4 border text-center">
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          {entry.bloodGroup}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div
+                          className="max-w-xs truncate"
+                          title={entry.currentAddress}
+                        >
+                          {entry.currentAddress}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border">{entry.idNumber}</td>
+                      <td className="px-6 py-4 border font-medium">
+                        {entry.licenceNumber}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        {formatDate(entry.issueDate)}
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            new Date(entry.expiryDate) > new Date()
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {formatDate(entry.expiryDate)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div className="space-y-2">
+                          {entry.vehicleCategories.map((vc, idx) => (
+                            <div key={idx} className="text-xs">
+                              <div className="flex items-center space-x-2">
+                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full whitespace-nowrap">
+                                  {vc.category}
+                                </span>
+                                <span className="text-gray-500 whitespace-nowrap">
+                                  {formatDate(vc.issueDate)} -{" "}
+                                  {formatDate(vc.expiryDate)}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(entry)}
+                            className="text-[#6DB6FE] hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
+                            title="Edit Licence"
+                            disabled={loading}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteClick(entry)}
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors"
+                            title="Delete Licence"
+                            disabled={loading}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+
+              {filteredData.length > 0 && (
+                <tfoot>
+                  <tr className="bg-gray-100">
+                    <td colSpan={13} className="px-6 py-3">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm text-gray-600">
+                          Showing {startIndex + 1} to{" "}
+                          {Math.min(endIndex, filteredData.length)} of{" "}
+                          {filteredData.length} licences
+                          {searchTerm &&
+                            ` (filtered from ${data.length} total)`}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handlePageChange(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Previous
+                          </button>
+                          <span className="text-sm text-gray-600">
+                            Page {currentPage} of {totalPages}
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          >
+                            Next
+                          </button>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
+            </table>
+          </div>
+        </div>
       </div>
 
       {isEditModalOpen && licenceToEdit && (
