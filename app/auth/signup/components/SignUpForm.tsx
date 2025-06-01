@@ -78,8 +78,8 @@ export default function SignUpForm() {
       return "Please enter a valid email address.";
     }
 
-    if (!/^07\d{8}$/.test(mobilenumber)) {
-      return "Mobile number must be in format 07XXXXXXXX";
+    if (mobilenumber.length !== 10) {
+      return "Please enter a valid 10-digit mobile number.";
     }
     if (idnumber.length < 10) {
       return "Please enter a valid ID number.";

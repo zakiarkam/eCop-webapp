@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   Search,
   Check,
@@ -117,11 +117,32 @@ export default function PendingUsersManagement() {
     action: "approve",
   });
 
+  const fetchPendingUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await PendingUsersApiService.fetchPendingUsers();
+      setPendingUsers(data);
+    } catch (error: unknown) {
+      console.error("failed to fetch pending users:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed fetch pending users. Please try again.";
+
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [enqueueSnackbar]);
+
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
       fetchPendingUsers();
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, fetchPendingUsers]);
 
   useEffect(() => {
     let filtered = pendingUsers;
@@ -135,20 +156,6 @@ export default function PendingUsersManagement() {
     }
     setFilteredUsers(filtered);
   }, [pendingUsers, searchTerm]);
-
-  const fetchPendingUsers = async () => {
-    setLoading(true);
-    try {
-      const data = await PendingUsersApiService.fetchPendingUsers();
-      setPendingUsers(data);
-    } catch (error) {
-      enqueueSnackbar("Failed to fetch pending users", {
-        variant: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleUserApproval = async (
     userId: string,
@@ -164,6 +171,7 @@ export default function PendingUsersManagement() {
         variant: "success",
       });
     } catch (error) {
+      console.error("Error processing user approval:", error);
       const errorMessage =
         error instanceof Error
           ? error.message
@@ -202,6 +210,7 @@ export default function PendingUsersManagement() {
         { variant: "success" }
       );
     } catch (error) {
+      console.error("Error processing bulk action:", error);
       enqueueSnackbar("Error processing bulk action", { variant: "error" });
     } finally {
       setLoading(false);
@@ -244,7 +253,7 @@ export default function PendingUsersManagement() {
             Access Denied
           </h2>
           <p className="text-red-600">
-            You don't have permission to access this page. Admin privileges
+            You don&apos;t have permission to access this page. Admin privileges
             required.
           </p>
           <div className="mt-4 text-sm text-red-500">

@@ -139,9 +139,17 @@ export default function EditLicenceModal({
         enqueueSnackbar("Failed to fetch licence data", { variant: "error" });
         onClose();
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error fetching licence:", error);
-      enqueueSnackbar("Error fetching licence data", { variant: "error" });
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Error fetching licence data. Please try again.";
+
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
       onClose();
     } finally {
       setFetchingData(false);
@@ -315,9 +323,15 @@ export default function EditLicenceModal({
           variant: "error",
         });
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating licence:", error);
-      enqueueSnackbar(error.message || "Error updating licence", {
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Error updating licence. Please try again.";
+
+      enqueueSnackbar(errorMessage, {
         variant: "error",
       });
     } finally {
