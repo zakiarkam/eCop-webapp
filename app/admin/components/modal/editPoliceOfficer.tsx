@@ -2,25 +2,11 @@
 import React, { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { useSnackbar } from "notistack";
-
-type PoliceOfficer = {
-  _id: string;
-  fullName: string;
-  nameWithInitials: string;
-  dob: string;
-  age: number;
-  policeNumber: string;
-  idNumber: string;
-  permanentAddress: string;
-  district: string;
-  province: string;
-  policeStation: string;
-  badgeNo: string;
-  phoneNumber: string;
-  rank: string;
-  joiningDate: string;
-  bloodGroup: string;
-};
+import {
+  PoliceOfficer,
+  policeOfficerAPI,
+  PoliceOfficerFormData,
+} from "@/services/apiServices/policeOfficerApi";
 
 interface EditPoliceOfficerModalProps {
   isOpen: boolean;
@@ -35,7 +21,7 @@ export default function EditPoliceOfficerModal({
   officerId,
   onSuccess,
 }: EditPoliceOfficerModalProps) {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<PoliceOfficerFormData>({
     fullName: "",
     nameWithInitials: "",
     dob: "",
@@ -68,15 +54,7 @@ export default function EditPoliceOfficerModal({
   const fetchOfficerData = async () => {
     setFetchLoading(true);
     try {
-      const response = await fetch(
-        `/api/other/policeOfficer/getOfficer/${officerId}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
+      const result = await policeOfficerAPI.getOfficer(officerId);
 
       if (result.success && result.data) {
         const officer = result.data;
@@ -102,7 +80,9 @@ export default function EditPoliceOfficerModal({
           bloodGroup: officer.bloodGroup || "",
         });
       } else {
-        enqueueSnackbar("Failed to fetch officer data", { variant: "error" });
+        enqueueSnackbar(result.message || "Failed to fetch officer data", {
+          variant: "error",
+        });
       }
     } catch (error) {
       console.error("Error fetching officer:", error);
@@ -118,7 +98,7 @@ export default function EditPoliceOfficerModal({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData((prev: PoliceOfficerFormData) => ({
       ...prev,
       [name]: value,
     }));
@@ -194,36 +174,35 @@ export default function EditPoliceOfficerModal({
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/other/policeOfficer/editOfficer/${officerId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            ...formData,
-            age: parseInt(formData.age, 10),
-          }),
-        }
+      const updateData = {
+        ...formData,
+        age: parseInt(formData.age, 10).toString(), // Ensure age is string as per interface
+      };
+
+      const result = await policeOfficerAPI.updateOfficer(
+        officerId,
+        updateData
       );
 
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        enqueueSnackbar("Police officer updated successfully", {
-          variant: "success",
-        });
-        onSuccess(result.data);
+      if (result.success) {
+        enqueueSnackbar(
+          result.message || "Police officer updated successfully",
+          {
+            variant: "success",
+          }
+        );
+        onSuccess(result.data!);
         onClose();
       } else {
         enqueueSnackbar(result.message || "Failed to update police officer", {
           variant: "error",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating officer:", error);
-      enqueueSnackbar("Error updating police officer", { variant: "error" });
+      enqueueSnackbar(error.message || "Error updating police officer", {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -281,7 +260,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Name with Initials */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Name with Initials *
@@ -305,7 +283,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Date of Birth */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date of Birth *
@@ -325,7 +302,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Age */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Age *
@@ -389,7 +365,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* District */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   District *
@@ -409,7 +384,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Province */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Province *
@@ -429,7 +403,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Police Station */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Police Station *
@@ -538,7 +511,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Joining Date */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Joining Date *
@@ -560,7 +532,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Blood Group */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Blood Group *
@@ -591,7 +562,6 @@ export default function EditPoliceOfficerModal({
                 )}
               </div>
 
-              {/* Permanent Address - Full Width */}
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Permanent Address *
@@ -616,7 +586,6 @@ export default function EditPoliceOfficerModal({
               </div>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end space-x-4 mt-6 pt-6 border-t">
               <button
                 type="button"

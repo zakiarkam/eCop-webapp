@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { useUser } from "@/lib/context/UserContext";
+import { PendingUsersApiService } from "@/services/apiServices/adminApi";
 
 interface PendingUser {
   _id: string;
@@ -138,18 +139,10 @@ export default function PendingUsersManagement() {
   const fetchPendingUsers = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/pending-users");
-      if (response.ok) {
-        const data = await response.json();
-        setPendingUsers(data.pendingUsers || []);
-      } else {
-        enqueueSnackbar("Failed to fetch pending users", {
-          variant: "error",
-        });
-      }
+      const data = await PendingUsersApiService.fetchPendingUsers();
+      setPendingUsers(data);
     } catch (error) {
-      console.error("Error fetching pending users:", error);
-      enqueueSnackbar("Error fetching pending users", {
+      enqueueSnackbar("Failed to fetch pending users", {
         variant: "error",
       });
     } finally {
@@ -164,29 +157,18 @@ export default function PendingUsersManagement() {
   ): Promise<void> => {
     setProcessing(userId);
     try {
-      const response = await fetch("/api/admin/approve-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId, approved }),
+      await PendingUsersApiService.approveUser(userId, approved);
+      setPendingUsers((prev) => prev.filter((user) => user._id !== userId));
+      const action = approved ? "approved" : "rejected";
+      enqueueSnackbar(`${userName} has been ${action} successfully!`, {
+        variant: "success",
       });
-      if (response.ok) {
-        setPendingUsers((prev) => prev.filter((user) => user._id !== userId));
-        const action = approved ? "approved" : "rejected";
-        enqueueSnackbar(`${userName} has been ${action} successfully!`, {
-          variant: "success",
-        });
-      } else {
-        const errorData = await response.json();
-        enqueueSnackbar(
-          errorData.message || "Error processing request. Please try again.",
-          { variant: "error" }
-        );
-      }
     } catch (error) {
-      console.error("Error processing user approval:", error);
-      enqueueSnackbar("Error processing request. Please try again.", {
-        variant: "error",
-      });
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Error processing request. Please try again.";
+      enqueueSnackbar(errorMessage, { variant: "error" });
     } finally {
       setProcessing(null);
     }
@@ -205,21 +187,21 @@ export default function PendingUsersManagement() {
 
     setLoading(true);
     try {
-      const promises = filteredUsers.map((user) =>
-        handleUserApproval(
-          user._id,
-          bulkModal.action === "approve",
-          user.rmbname
-        )
+      const userIds = filteredUsers.map((user) => user._id);
+      await PendingUsersApiService.bulkApproveUsers(
+        userIds,
+        bulkModal.action === "approve"
       );
-      await Promise.all(promises);
+
+      setPendingUsers((prev) =>
+        prev.filter((user) => !userIds.includes(user._id))
+      );
 
       enqueueSnackbar(
         `Successfully ${bulkModal.action}ed ${filteredUsers.length} users!`,
         { variant: "success" }
       );
     } catch (error) {
-      console.error("Error in bulk action:", error);
       enqueueSnackbar("Error processing bulk action", { variant: "error" });
     } finally {
       setLoading(false);

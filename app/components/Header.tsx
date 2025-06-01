@@ -5,15 +5,11 @@ import { FaUserCircle, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import logo from "../../public/ecop.svg";
-import { Notifications } from "./Notifications";
 import { useUser } from "../../lib/context/UserContext";
 
 export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const notificationRef = useRef<HTMLDivElement | null>(null);
-
   const { user, isAuthenticated, isLoading } = useUser();
 
   const handleProfileClick = () => {
@@ -39,12 +35,6 @@ export default function Header() {
         !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsDropdownOpen(false);
-      }
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target as Node)
-      ) {
-        setIsNotificationOpen(false);
       }
     };
 
@@ -83,20 +73,6 @@ export default function Header() {
 
       {isAuthenticated && user && (
         <div className="flex items-center space-x-4">
-          {/* <div className="relative" ref={notificationRef}>
-            <button
-              className="flex items-center space-x-2 mx-4 relative"
-              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-            >
-              <FaBell className="text-xl text-gray-600 hover:text-gray-800" />
-            </button>
-            {isNotificationOpen && (
-              <div className="absolute right-0 my-3 w-64 bg-white border border-gray-200 rounded shadow-lg z-50">
-                <Notifications />
-              </div>
-            )}
-          </div> */}
-
           <div className="relative" ref={dropdownRef}>
             <button
               className="flex items-center space-x-2 mx-4 hover:bg-gray-50 rounded-lg px-2 py-1 transition-colors"

@@ -1,23 +1,11 @@
 "use client";
-import { useUser } from "@/lib/context/UserContext";
 import React, { useState, useEffect } from "react";
-
-type UserDetails = {
-  rmbname?: string;
-  email?: string;
-  mobilenumber?: string;
-  rmbdistrict?: string;
-  rmbprovince?: string;
-  idnumber?: string;
-  role?: string;
-  isApproved?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-};
+import { useUser } from "@/lib/context/UserContext";
+import { userApiService, UserData } from "@/services/apiServices/userApi";
 
 export default function Settings() {
   const { user, isLoading } = useUser();
-  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
+  const [userDetails, setUserDetails] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -30,21 +18,13 @@ export default function Settings() {
       }
 
       try {
-        const response = await fetch(`/api/other/user/getUser/${user.id}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.message || "Failed to fetch user details");
-        }
-
-        setUserDetails(data.data);
+        const response = await userApiService.getUserById(user.id);
+        setUserDetails(response.data);
         setError("");
       } catch (err) {
         console.error("Error fetching user details:", err);
         setError(
-          err && typeof err === "object" && "message" in err
-            ? String((err as { message?: string }).message)
-            : "Failed to load user details"
+          err instanceof Error ? err.message : "Failed to load user details"
         );
       } finally {
         setLoading(false);
@@ -134,6 +114,15 @@ export default function Settings() {
 
             <div>
               <label className="text-gray-800 text-sm mb-2 block font-semibold">
+                RMV Province
+              </label>
+              <div className="bg-gray-50 w-full text-sm text-gray-800 px-4 py-3 rounded-md border">
+                {userDetails.rmbprovince || "Not provided"}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-gray-800 text-sm mb-2 block font-semibold">
                 ID Number
               </label>
               <div className="bg-gray-50 w-full text-sm text-gray-800 px-4 py-3 rounded-md border">
@@ -149,25 +138,41 @@ export default function Settings() {
                 {userDetails.role || "Not provided"}
               </div>
             </div>
-          </div>
 
-          {userDetails.createdAt && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="text-sm text-gray-600">
-                <p>
-                  Account created:{" "}
-                  {new Date(userDetails.createdAt).toLocaleDateString()}
-                </p>
-                {userDetails.updatedAt &&
-                  userDetails.updatedAt !== userDetails.createdAt && (
-                    <p>
-                      Last updated:{" "}
-                      {new Date(userDetails.updatedAt).toLocaleDateString()}
-                    </p>
-                  )}
+            <div>
+              <label className="text-gray-800 text-sm mb-2 block font-semibold">
+                Status
+              </label>
+              <div className="bg-gray-50 w-full text-sm text-gray-800 px-4 py-3 rounded-md border">
+                <span
+                  className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    userDetails.isApproved
+                      ? "bg-green-100 text-green-800"
+                      : "bg-yellow-100 text-yellow-800"
+                  }`}
+                >
+                  {userDetails.isApproved ? "Approved" : "Pending Approval"}
+                </span>
               </div>
             </div>
-          )}
+          </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="text-sm text-gray-600">
+              {userDetails.approvedAt && (
+                <p>
+                  Account approved:{" "}
+                  {new Date(userDetails.approvedAt).toLocaleDateString()}
+                </p>
+              )}
+              {userDetails.updatedAt && (
+                <p>
+                  Last updated:{" "}
+                  {new Date(userDetails.updatedAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

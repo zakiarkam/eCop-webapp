@@ -75,7 +75,6 @@ export async function GET(
   }
 }
 
-// PUT update licence by ID
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -113,7 +112,6 @@ export async function PUT(
       expiryDatePerCategory,
     } = body;
 
-    // Validation
     if (
       !fullName ||
       !nameWithInitials ||
@@ -186,7 +184,6 @@ export async function PUT(
       }
     }
 
-    // Update the licence
     const updatedLicense = await License.findByIdAndUpdate(
       id,
       {
@@ -231,7 +228,6 @@ export async function PUT(
       );
     }
 
-    // Handle validation errors
     if (error.name === "ValidationError") {
       const validationErrors = Object.values(error.errors).map(
         (err: any) => err.message

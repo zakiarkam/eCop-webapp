@@ -1,25 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSnackbar } from "notistack";
-import { FaPlus } from "react-icons/fa";
 import DeleteConfirmationModal from "./modal/deleteModal";
-import { Edit, Trash2 } from "lucide-react";
-
-type RuleType = {
-  _id: string;
-  section: string;
-  provision: string;
-  fine: string;
-  points: number;
-  createdAt: string;
-};
-
-interface ApiResponse {
-  message: string;
-  rule?: RuleType;
-  rules?: RuleType[];
-  errors?: string[];
-}
+import { Edit, PlusCircle, Trash2 } from "lucide-react";
+import {
+  rulesApiService,
+  RuleType,
+  CreateRuleData,
+} from "@/services/apiServices/rulesApi";
 
 export default function RulesManagement() {
   const { enqueueSnackbar } = useSnackbar();
@@ -51,19 +39,26 @@ export default function RulesManagement() {
   const fetchRules = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/other/rules/getAllRules");
-      const result: ApiResponse = await response.json();
+      const result = await rulesApiService.getAllRules();
 
-      if (response.ok && result.rules) {
+      if (result.rules) {
         setRulesData(result.rules);
       } else {
         enqueueSnackbar(result.message || "Failed to fetch rules", {
           variant: "error",
         });
       }
-    } catch (error) {
-      console.error("Error fetching rules:", error);
-      enqueueSnackbar("Failed to fetch rules", { variant: "error" });
+    } catch (error: unknown) {
+      console.error("Error submitting rule:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed fetch rules. Please try again.";
+
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -91,48 +86,13 @@ export default function RulesManagement() {
 
   const validateForm = () => {
     const data = editingRule || newRule;
-    if (!data.section || !data.provision || !data.fine || !data.points) {
-      return "All fields are required!";
-    }
-
-    const points =
-      typeof data.points === "string" ? parseInt(data.points) : data.points;
-    if (points < 0 || points > 10) {
-      return "Points must be between 0 and 10!";
-    }
-
-    return null;
-  };
-
-  const submitToAPI = async (
-    ruleData: any,
-    isEdit: boolean = false
-  ): Promise<ApiResponse> => {
-    const url = isEdit
-      ? `/api/other/rules/editRule/${editingRule?._id}`
-      : "/api/other/rules/createRule";
-    const method = isEdit ? "PUT" : "POST";
-
-    const response = await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...ruleData,
-        points: parseInt(ruleData.points.toString()),
-      }),
+    return rulesApiService.validateRuleData({
+      section: data.section,
+      provision: data.provision,
+      fine: data.fine,
+      points:
+        typeof data.points === "string" ? parseInt(data.points) : data.points,
     });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    return result;
   };
 
   const handleSubmit = async () => {
@@ -146,23 +106,36 @@ export default function RulesManagement() {
 
     try {
       const isEdit = !!editingRule;
-      const ruleData = editingRule || newRule;
+      const ruleData: CreateRuleData = {
+        section: isEdit ? editingRule.section : newRule.section,
+        provision: isEdit ? editingRule.provision : newRule.provision,
+        fine: isEdit ? editingRule.fine : newRule.fine,
+        points: isEdit ? editingRule.points : parseInt(newRule.points),
+      };
 
-      const result = await submitToAPI(ruleData, isEdit);
+      let result;
+      if (isEdit) {
+        result = await rulesApiService.updateRule(editingRule._id, ruleData);
+      } else {
+        result = await rulesApiService.createRule(ruleData);
+      }
 
       enqueueSnackbar(result.message, { variant: "success" });
 
       // Reset form
       if (editingRule) {
         setEditingRule(null);
-      } else {
-        setNewRule({ section: "", provision: "", fine: "", points: "" });
       }
+      setNewRule({ section: "", provision: "", fine: "", points: "" });
 
       await fetchRules();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting rule:", error);
-      enqueueSnackbar(error.message || "Failed to save rule", {
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to save rule.";
+
+      enqueueSnackbar(errorMessage, {
         variant: "error",
       });
     } finally {
@@ -191,26 +164,20 @@ export default function RulesManagement() {
     setDeleteLoading(true);
 
     try {
-      const response = await fetch(
-        `/api/other/rules/deleteRule/${ruleToDelete._id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const result = await rulesApiService.deleteRule(ruleToDelete._id);
+      enqueueSnackbar(result.message, { variant: "success" });
+      await fetchRules();
+    } catch (error: unknown) {
+      console.error("Error delete rule:", error);
 
-      const result = await response.json();
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit delete rule. Please try again.";
 
-      if (response.ok) {
-        enqueueSnackbar(result.message, { variant: "success" });
-        await fetchRules();
-      } else {
-        enqueueSnackbar(result.message || "Failed to delete rule", {
-          variant: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error deleting rule:", error);
-      enqueueSnackbar("Failed to delete rule", { variant: "error" });
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
     } finally {
       setDeleteLoading(false);
       setIsDeleteModalOpen(false);
@@ -304,9 +271,9 @@ export default function RulesManagement() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="bg-[#15134A] text-white px-6 py-3 rounded-md hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              className="bg-[#15134A] text-white px-8 py-3 rounded-md hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
-              <FaPlus className="w-4 h-4" />
+              <PlusCircle className="w-4 h-4" />
               {loading ? "Saving..." : editingRule ? "Update Rule" : "Add Rule"}
             </button>
 

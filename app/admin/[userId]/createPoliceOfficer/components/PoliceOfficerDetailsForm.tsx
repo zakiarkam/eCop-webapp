@@ -3,6 +3,10 @@ import React, { useState } from "react";
 import { useSnackbar } from "notistack";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/context/UserContext";
+import {
+  policeOfficerAPI,
+  type PoliceOfficerFormData,
+} from "@/services/apiServices/policeOfficerApi";
 
 const districtToProvince = {
   Colombo: "Western Province",
@@ -32,41 +36,12 @@ const districtToProvince = {
   Puttalam: "North-Western Province",
 };
 
-type PoliceOfficerFormType = {
-  fullName: string;
-  nameWithInitials: string;
-  dob: string;
-  age: string;
-  policeNumber: string;
-  idNumber: string;
-  permanentAddress: string;
-  district: string;
-  province: string;
-  policeStation: string;
-  badgeNo: string;
-  phoneNumber: string;
-  rank: string;
-  joiningDate: string;
-  bloodGroup: string;
-};
-
-interface ApiResponse {
-  message: string;
-  officer?: {
-    id: string;
-    fullName: string;
-    policeNumber: string;
-    badgeNo: string;
-  };
-  errors?: string[];
-}
-
 export default function PoliceOfficerDetailsForm() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { user } = useUser();
 
-  const [form, setForm] = useState<PoliceOfficerFormType>({
+  const [form, setForm] = useState<PoliceOfficerFormData>({
     fullName: "",
     nameWithInitials: "",
     dob: "",
@@ -170,28 +145,6 @@ export default function PoliceOfficerDetailsForm() {
     }));
   };
 
-  const submitToAPI = async (
-    formData: PoliceOfficerFormType
-  ): Promise<ApiResponse> => {
-    const response = await fetch("/api/other/policeOfficer/createOfficer", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    return result;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -205,13 +158,15 @@ export default function PoliceOfficerDetailsForm() {
     setLoading(true);
 
     try {
-      const result = await submitToAPI(form);
+      // Use the API function instead of direct fetch
+      const result = await policeOfficerAPI.createOfficer(form);
 
       enqueueSnackbar(
         `Police Officer created successfully! Officer ID: ${result.officer?.id}`,
         { variant: "success" }
       );
 
+      // Reset form
       setForm({
         fullName: "",
         nameWithInitials: "",
@@ -231,22 +186,22 @@ export default function PoliceOfficerDetailsForm() {
       });
 
       console.log("Police Officer created successfully:", result);
+
+      // Navigate after success
       setTimeout(() => {
         router.push(`/admin/${user?.id}`);
       }, 2000);
-    } catch (error: any) {
-      console.error("Error submitting police officer:", error);
+    } catch (error: unknown) {
+      console.error("Error submitting licence:", error);
 
-      if (error.message) {
-        enqueueSnackbar(error.message, { variant: "error" });
-      } else {
-        enqueueSnackbar(
-          "Failed to submit police officer details. Please try again.",
-          {
-            variant: "error",
-          }
-        );
-      }
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit Police Officer details. Please try again.";
+
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }

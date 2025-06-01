@@ -1,27 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, CalendarIcon, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
-
-type LicenceHolder = {
-  _id: string;
-  fullName: string;
-  nameWithInitials: string;
-  dob: string;
-  age: number;
-  issueDate: string;
-  expiryDate: string;
-  idNumber: string;
-  licenceNumber: string;
-  permanentAddress: string;
-  currentAddress: string;
-  bloodGroup: string;
-  vehicleCategories: Array<{
-    category: string;
-    issueDate: string;
-    expiryDate: string;
-  }>;
-};
+import licenceService, {
+  LicenceHolder,
+  UpdateLicenceData,
+} from "@/services/apiServices/licenceApi";
 
 interface EditLicenceModalProps {
   isOpen: boolean;
@@ -112,8 +96,7 @@ export default function EditLicenceModal({
   const fetchLicenceData = async () => {
     setFetchingData(true);
     try {
-      const response = await fetch(`/api/other/licence/getHolder/${licenceId}`);
-      const result = await response.json();
+      const result = await licenceService.getLicenceHolderById(licenceId);
 
       if (result.success && result.data) {
         const licence = result.data;
@@ -293,27 +276,35 @@ export default function EditLicenceModal({
 
     setLoading(true);
     try {
-      const response = await fetch(
-        `/api/other/licence/editHolder/${licenceId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
+      const updateData: UpdateLicenceData = {
+        fullName: formData.fullName,
+        nameWithInitials: formData.nameWithInitials,
+        dob: formData.dob,
+        age: formData.age,
+        issueDate: formData.issueDate,
+        expiryDate: formData.expiryDate,
+        idNumber: formData.idNumber,
+        licenceNumber: formData.licenceNumber,
+        permanentAddress: formData.permanentAddress,
+        currentAddress: formData.currentAddress,
+        bloodGroup: formData.bloodGroup,
+        vehicleCategories: formData.vehicleCategories,
+        issueDatePerCategory: formData.issueDatePerCategory,
+        expiryDatePerCategory: formData.expiryDatePerCategory,
+      };
+
+      const result = await licenceService.updateLicenceHolder(
+        licenceId,
+        updateData
       );
 
-      const result = await response.json();
-
-      if (response.ok && result.license) {
+      if (result.license) {
         enqueueSnackbar("Licence updated successfully", { variant: "success" });
 
-        const updatedResponse = await fetch(
-          `/api/other/licence/getHolder/${licenceId}`
+        // Fetch updated data
+        const updatedResult = await licenceService.getLicenceHolderById(
+          licenceId
         );
-        const updatedResult = await updatedResponse.json();
-
         if (updatedResult.success && updatedResult.data) {
           onSuccess(updatedResult.data);
         }
@@ -324,9 +315,11 @@ export default function EditLicenceModal({
           variant: "error",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error updating licence:", error);
-      enqueueSnackbar("Error updating licence", { variant: "error" });
+      enqueueSnackbar(error.message || "Error updating licence", {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -512,7 +505,7 @@ export default function EditLicenceModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-gray-2 mb-1">
                     Current Address <span className="text-red-500">*</span>
                   </label>
                   <textarea

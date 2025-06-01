@@ -1,19 +1,10 @@
 import { useSnackbar } from "notistack";
 import React, { useState, useEffect } from "react";
-
-type UserData = {
-  id: string;
-  rmbname: string;
-  rmbdistrict: string;
-  rmbprovince: string;
-  email: string;
-  mobilenumber: string;
-  idnumber: string;
-  role: string;
-  isApproved: boolean;
-  approvedAt: string;
-  updatedAt: string;
-};
+import {
+  UpdateUserData,
+  userApiService,
+  UserData,
+} from "@/services/apiServices/userApi";
 
 interface EditUserModalProps {
   user: UserData | null;
@@ -122,38 +113,35 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/other/user/editUser/${formData.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          rmbname: formData.rmbname,
-          rmbdistrict: formData.rmbdistrict,
-          email: formData.email,
-          mobilenumber: formData.mobilenumber,
-          idnumber: formData.idnumber,
-          role: formData.role,
-          isApproved: formData.isApproved,
-        }),
-      });
+      const updateData: UpdateUserData = {
+        rmbname: formData.rmbname,
+        rmbdistrict: formData.rmbdistrict,
+        email: formData.email,
+        mobilenumber: formData.mobilenumber,
+        idnumber: formData.idnumber,
+        role: formData.role,
+        isApproved: formData.isApproved,
+      };
 
-      const result = await response.json();
+      const result = await userApiService.updateUser(formData.id, updateData);
 
       if (result.success) {
         onSave(result.data);
         onClose();
-        enqueueSnackbar(`User updated successfully`, {
+        enqueueSnackbar("User updated successfully", {
           variant: "success",
         });
-      } else {
-        alert("Error updating user: " + result.message);
       }
     } catch (error) {
       console.error("Error updating user:", error);
-      enqueueSnackbar(`Error updating user`, {
-        variant: "error",
-      });
+      enqueueSnackbar(
+        `Error updating user: ${
+          error instanceof Error ? error.message : "Unknown error"
+        }`,
+        {
+          variant: "error",
+        }
+      );
     } finally {
       setLoading(false);
     }

@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import Rule from "@/models/rule";
 import connectToDatabase from "@/lib/mongo/mongodb";
-import type { NextRequest } from "next/server";
 
 export async function GET(): Promise<NextResponse> {
   try {

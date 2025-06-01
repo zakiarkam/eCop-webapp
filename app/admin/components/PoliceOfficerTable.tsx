@@ -4,32 +4,10 @@ import { Edit, Trash2 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import DeleteConfirmationModal from "./modal/deleteModal";
 import EditPoliceOfficerModal from "./modal/editPoliceOfficer";
-
-type PoliceOfficer = {
-  _id: string;
-  fullName: string;
-  nameWithInitials: string;
-  dob: string;
-  age: number;
-  policeNumber: string;
-  idNumber: string;
-  permanentAddress: string;
-  district: string;
-  province: string;
-  policeStation: string;
-  badgeNo: string;
-  phoneNumber: string;
-  rank: string;
-  joiningDate: string;
-  bloodGroup: string;
-};
-
-interface ApiResponse {
-  success: boolean;
-  data?: PoliceOfficer[];
-  message?: string;
-  total?: number;
-}
+import {
+  PoliceOfficer,
+  policeOfficerAPI,
+} from "@/services/apiServices/policeOfficerApi";
 
 interface PoliceOfficerTableProps {
   searchTerm?: string;
@@ -56,28 +34,14 @@ export default function PoliceOfficerTable({
 
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fetch data from API
+  // Fetch data using API service
   useEffect(() => {
     const fetchOfficers = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(
-          `/api/other/policeOfficer/getAllOfficers`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result: ApiResponse = await response.json();
+        const result = await policeOfficerAPI.getAllOfficers();
 
         if (result.success && result.data) {
           setData(result.data);
@@ -167,16 +131,9 @@ export default function PoliceOfficerTable({
 
     setDeleteLoading(true);
     try {
-      const response = await fetch(
-        `/api/other/policeOfficer/deleteOfficer/${officerToDelete.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const result = await policeOfficerAPI.deleteOfficer(officerToDelete.id);
 
-      const result = await response.json();
-
-      if (result.success || response.ok) {
+      if (result.success) {
         setData((prevData) =>
           prevData.filter((officer) => officer._id !== officerToDelete.id)
         );
