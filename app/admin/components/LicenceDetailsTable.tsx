@@ -1,36 +1,12 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { Edit, Trash2 } from "lucide-react";
-import { enqueueSnackbar, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import DeleteConfirmationModal from "./modal/deleteModal";
 import EditLicenceModal from "./modal/editLicenceHolder";
-
-type LicenceHolder = {
-  _id: string;
-  fullName: string;
-  nameWithInitials: string;
-  dob: string;
-  age: number;
-  issueDate: string;
-  expiryDate: string;
-  idNumber: string;
-  licenceNumber: string;
-  permanentAddress: string;
-  currentAddress: string;
-  bloodGroup: string;
-  vehicleCategories: Array<{
-    category: string;
-    issueDate: string;
-    expiryDate: string;
-  }>;
-};
-
-interface ApiResponse {
-  success: boolean;
-  data?: LicenceHolder[];
-  message?: string;
-  total?: number;
-}
+import licenceService, {
+  LicenceHolder,
+} from "@/services/apiServices/licenceApi";
 
 interface LicenceDetailsTableProps {
   searchTerm?: string;
@@ -57,40 +33,31 @@ export default function LicenceDetailsTable({
 
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fetch data from API
+  // Fetch data from API using the service
   useEffect(() => {
-    const fetchLicenses = async () => {
+    const fetchLicences = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/other/licence/getAllHolder`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result: ApiResponse = await response.json();
+        const result = await licenceService.getAllLicenceHolders();
 
         if (result.success && result.data) {
           setData(result.data);
         } else {
-          setError(result.message || "Failed to fetch licenses");
+          setError(result.message || "Failed to fetch licences");
         }
       } catch (err) {
-        console.error("Error fetching licenses:", err);
-        setError("Failed to load license data");
+        console.error("Error fetching licences:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load licence data"
+        );
       } finally {
         setLoading(false);
       }
     };
 
-    fetchLicenses();
+    fetchLicences();
   }, []);
 
   const filteredData = useMemo(() => {
@@ -142,6 +109,9 @@ export default function LicenceDetailsTable({
     );
     setIsEditModalOpen(false);
     setLicenceToEdit(null);
+    enqueueSnackbar("Licence updated successfully", {
+      variant: "success",
+    });
   };
 
   const handleEditCancel = () => {
@@ -164,22 +134,17 @@ export default function LicenceDetailsTable({
 
     setDeleteLoading(true);
     try {
-      const response = await fetch(
-        `/api/other/licence/deleteHolder/${licenceToDelete.id}`,
-        {
-          method: "DELETE",
-        }
+      const result = await licenceService.deleteLicenceHolder(
+        licenceToDelete.id
       );
 
-      const result = await response.json();
-
-      if (result.success || response.ok) {
+      if (result.success) {
         setData((prevData) =>
           prevData.filter((licence) => licence._id !== licenceToDelete.id)
         );
         setIsDeleteModalOpen(false);
         setLicenceToDelete(null);
-        enqueueSnackbar(`Licence deleted successfully`, {
+        enqueueSnackbar("Licence deleted successfully", {
           variant: "success",
         });
       } else {
@@ -192,9 +157,12 @@ export default function LicenceDetailsTable({
       }
     } catch (error) {
       console.error("Error deleting licence:", error);
-      enqueueSnackbar(`Error deleting licence`, {
-        variant: "error",
-      });
+      enqueueSnackbar(
+        error instanceof Error ? error.message : "Error deleting licence",
+        {
+          variant: "error",
+        }
+      );
     } finally {
       setDeleteLoading(false);
     }
@@ -214,10 +182,33 @@ export default function LicenceDetailsTable({
     });
   };
 
+  const refreshData = async () => {
+    try {
+      setLoading(true);
+      const result = await licenceService.getAllLicenceHolders();
+      if (result.success && result.data) {
+        setData(result.data);
+      }
+    } catch (err) {
+      console.error("Error refreshing data:", err);
+      enqueueSnackbar("Failed to refresh data", { variant: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-        <p className="text-red-600">Error: {error}</p>
+        <div className="flex justify-between items-center">
+          <p className="text-red-600">Error: {error}</p>
+          <button
+            onClick={refreshData}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }

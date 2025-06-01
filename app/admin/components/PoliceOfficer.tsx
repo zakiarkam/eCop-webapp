@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import PoliceOfficerTable from "./PoliceOfficerTable";
-import Link from "next/link";
 import { useUser } from "@/lib/context/UserContext";
 import { useRouter } from "next/navigation";
 

@@ -2,29 +2,13 @@
 import React, { useState, useEffect, useMemo } from "react";
 import EditUserModal from "./modal/editUser";
 import { Edit, Trash2 } from "lucide-react";
-import { enqueueSnackbar, useSnackbar } from "notistack";
+import { useSnackbar } from "notistack";
 import DeleteConfirmationModal from "./modal/deleteModal";
-
-type UserData = {
-  id: string;
-  rmbname: string;
-  rmbdistrict: string;
-  rmbprovince: string;
-  email: string;
-  mobilenumber: string;
-  idnumber: string;
-  role: string;
-  isApproved: boolean;
-  approvedAt: string;
-  updatedAt: string;
-};
-
-type ApiResponse = {
-  success: boolean;
-  data: UserData[];
-  total: number;
-  message?: string;
-};
+import {
+  GetUsersParams,
+  userApiService,
+  UserData,
+} from "@/services/apiServices/userApi";
 
 interface UserDataTableProps {
   searchTerm?: string;
@@ -60,14 +44,11 @@ export default function UserDataTable({
         setLoading(true);
         setError(null);
 
-        const params = new URLSearchParams();
-        if (roleFilter) params.append("role", roleFilter);
-        if (approvalFilter !== "") params.append("isApproved", approvalFilter);
+        const params: GetUsersParams = {};
+        if (roleFilter) params.role = roleFilter;
+        if (approvalFilter !== "") params.isApproved = approvalFilter;
 
-        const response = await fetch(
-          `/api/other/user/getAllUser?${params.toString()}`
-        );
-        const result: ApiResponse = await response.json();
+        const result = await userApiService.getAllUsers(params);
 
         if (result.success) {
           setData(result.data);
@@ -75,7 +56,9 @@ export default function UserDataTable({
           setError(result.message || "Failed to fetch users");
         }
       } catch (err) {
-        setError("Error fetching users");
+        const errorMessage =
+          err instanceof Error ? err.message : "Error fetching users";
+        setError(errorMessage);
         console.error("Error fetching users:", err);
       } finally {
         setLoading(false);
@@ -147,30 +130,23 @@ export default function UserDataTable({
 
     setDeleteLoading(true);
     try {
-      const response = await fetch(
-        `/api/other/user/deleteUser/${userToDelete.id}`,
-        {
-          method: "DELETE",
-        }
-      );
+      const result = await userApiService.deleteUser(userToDelete.id);
 
-      const result = await response.json();
-
-      if (result.success || response.ok) {
+      if (result.success) {
         setData((prevData) =>
           prevData.filter((user) => user.id !== userToDelete.id)
         );
         setIsDeleteModalOpen(false);
         setUserToDelete(null);
-        enqueueSnackbar(`User deleted successfully`, {
+        enqueueSnackbar("User deleted successfully", {
           variant: "success",
         });
-      } else {
-        alert("Error deleting user: " + (result.message || "Unknown error"));
       }
     } catch (error) {
       console.error("Error deleting user:", error);
-      enqueueSnackbar(`Error deleting user`, {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      enqueueSnackbar(`Error deleting user: ${errorMessage}`, {
         variant: "error",
       });
     } finally {
@@ -196,6 +172,12 @@ export default function UserDataTable({
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
         <p className="text-red-600">Error: {error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+        >
+          Retry
+        </button>
       </div>
     );
   }
@@ -331,16 +313,6 @@ export default function UserDataTable({
                           <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                          >
-                            Previous
-                          </button>
-                          <span className="text-sm text-gray-600">
-                            Page {currentPage} of {totalPages}
-                          </span>
-                          <button
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
                             className="px-4 py-2 bg-blue-500 text-white text-sm rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                           >
                             Next

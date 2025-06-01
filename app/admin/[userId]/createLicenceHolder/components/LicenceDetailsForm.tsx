@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import { useSnackbar } from "notistack";
-
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/context/UserContext";
+import licenceService, {
+  CreateLicenceData,
+} from "@/services/apiServices/licenceApi";
 
 type LicenseFormType = {
   fullName: string;
@@ -21,17 +23,6 @@ type LicenseFormType = {
   issueDatePerCategory: { [key: string]: string };
   expiryDatePerCategory: { [key: string]: string };
 };
-
-interface ApiResponse {
-  message: string;
-  license?: {
-    id: string;
-    fullName: string;
-    licenceNumber: string;
-    idNumber: string;
-  };
-  errors?: string[];
-}
 
 export default function LicenceDetailsForm() {
   const { enqueueSnackbar } = useSnackbar();
@@ -53,7 +44,6 @@ export default function LicenceDetailsForm() {
     issueDatePerCategory: {},
     expiryDatePerCategory: {},
   });
-
   const [loading, setLoading] = useState(false);
 
   const vehicleOptions = [
@@ -71,7 +61,6 @@ export default function LicenceDetailsForm() {
     "G",
     "J",
   ];
-
   const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
   const validateForm = () => {
@@ -141,28 +130,6 @@ export default function LicenceDetailsForm() {
     }));
   };
 
-  const submitToAPI = async (
-    formData: LicenseFormType
-  ): Promise<ApiResponse> => {
-    const response = await fetch("/api/other/licence/createHolder", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        result.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    return result;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -174,9 +141,10 @@ export default function LicenceDetailsForm() {
     }
 
     setLoading(true);
-
     try {
-      const result = await submitToAPI(form);
+      const result = await licenceService.createLicenceHolder(
+        form as CreateLicenceData
+      );
 
       enqueueSnackbar(
         `Licence created successfully! Licence ID: ${result.license?.id}`,
@@ -204,16 +172,17 @@ export default function LicenceDetailsForm() {
       setTimeout(() => {
         router.push(`/admin/${user?.id}`);
       }, 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error submitting licence:", error);
 
-      if (error.message) {
-        enqueueSnackbar(error.message, { variant: "error" });
-      } else {
-        enqueueSnackbar("Failed to submit licence details. Please try again.", {
-          variant: "error",
-        });
-      }
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to submit licence details. Please try again.";
+
+      enqueueSnackbar(errorMessage, {
+        variant: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -284,7 +253,6 @@ export default function LicenceDetailsForm() {
         setDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -302,7 +270,6 @@ export default function LicenceDetailsForm() {
           Add the Details of Licence Holder
         </h4>
       </div>
-
       <div className="mx-4 mb-4 -mt-16">
         <div className="max-w-4xl mx-auto mb-4 bg-white shadow-lg p-8 rounded-md">
           <form onSubmit={handleSubmit}>
@@ -321,7 +288,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Name with Initials <span className="text-red-500">*</span>
@@ -336,7 +302,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Date of Birth <span className="text-red-500">*</span>
@@ -350,7 +315,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Age <span className="text-red-500">*</span>
@@ -366,7 +330,6 @@ export default function LicenceDetailsForm() {
                   readOnly
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Blood Group <span className="text-red-500">*</span>
@@ -386,7 +349,6 @@ export default function LicenceDetailsForm() {
                   ))}
                 </select>
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Date of Issue of the licence{" "}
@@ -401,7 +363,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Date of Expiry of the licence{" "}
@@ -416,7 +377,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Administrative Number (ID No){" "}
@@ -432,7 +392,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Licence Number <span className="text-red-500">*</span>
@@ -447,7 +406,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Permanent Address <span className="text-red-500">*</span>
@@ -462,7 +420,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
                   Current Address <span className="text-red-500">*</span>
@@ -477,7 +434,6 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
-
               {/* Vehicle Categories */}
               <div className="relative">
                 <label className="text-gray-800 text-sm mb-2 block">
@@ -549,7 +505,6 @@ export default function LicenceDetailsForm() {
                 </div>
               </div>
             </div>
-
             {/* Vehicle Category Details */}
             {form.vehicleCategories.length > 0 && (
               <div className="mt-4 space-y-4">
@@ -567,7 +522,6 @@ export default function LicenceDetailsForm() {
                         Remove
                       </button>
                     </div>
-
                     <div className="grid grid-cols-2 gap-4 mt-2">
                       <div>
                         <label className="text-gray-800 text-sm mb-2 block">
@@ -586,7 +540,6 @@ export default function LicenceDetailsForm() {
                           }
                         />
                       </div>
-
                       <div>
                         <label className="text-gray-800 text-sm mb-2 block">
                           Date of Expiry <span className="text-red-500">*</span>
@@ -609,7 +562,6 @@ export default function LicenceDetailsForm() {
                 ))}
               </div>
             )}
-
             <div className="mt-8">
               <button
                 type="submit"
