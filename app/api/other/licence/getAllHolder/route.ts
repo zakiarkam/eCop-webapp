@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import License from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
-import type { NextRequest } from "next/server";
 
 interface LicenseData {
   _id: string;
@@ -34,12 +32,8 @@ interface LicenseResponse {
   total?: number;
 }
 
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<LicenseResponse>> {
+export async function GET(): Promise<NextResponse<LicenseResponse>> {
   try {
-    const session = await getServerSession();
-
     await connectToDatabase();
 
     const licenses = await License.find({})

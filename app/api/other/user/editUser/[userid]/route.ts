@@ -5,12 +5,12 @@ import connectToDatabase from "@/lib/mongo/mongodb";
 // PUT method for updating user
 export async function PUT(
   request: Request,
-  { params }: { params: { userid: string } }
+  { params }: { params: Promise<{ userid: string }> }
 ) {
   try {
     await connectToDatabase();
 
-    const { userid } = params;
+    const { userid } = await params;
 
     if (!userid) {
       return NextResponse.json(

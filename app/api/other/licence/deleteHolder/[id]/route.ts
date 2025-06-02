@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import License from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
@@ -11,11 +10,10 @@ interface DeleteResponse {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<DeleteResponse>> {
   try {
-    const session = await getServerSession();
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(

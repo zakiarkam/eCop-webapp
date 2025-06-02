@@ -15,7 +15,7 @@ export default function NotFound() {
             <h1 className="text-7xl  font-bold opacity-90 mb-4">404</h1>
             <h2 className="text-3xl  font-bold mb-4">Page Not Found</h2>
             <p className="text-lg opacity-90">
-              Oops! The page you're looking for seems to have wandered off.
+              Oops! The page you&apos;re looking for seems to have wandered off.
             </p>
           </div>
         </div>
@@ -31,8 +31,8 @@ export default function NotFound() {
               What happened?
             </h3>
             <p className="text-gray-600 text-sm leading-relaxed">
-              The page you're trying to access doesn't exist or may have been
-              moved. Don't worry, it happens to the best of us!
+              The page you&apos;re trying to access doesn&apos;t exist or may
+              have been moved. Don&apos;t worry, it happens to the best of us!
             </p>
           </div>
 

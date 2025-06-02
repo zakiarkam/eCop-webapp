@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { FaUserCircle, FaUser, FaSignOutAlt, FaBell } from "react-icons/fa";
+import { FaUserCircle, FaUser, FaSignOutAlt } from "react-icons/fa";
 import { signOut } from "next-auth/react";
 import Image from "next/image";
 import logo from "../../public/ecop.svg";

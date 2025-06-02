@@ -118,8 +118,7 @@ export default function PoliceOfficerDetailsForm() {
     }
 
     // Phone number validation (Sri Lankan format)
-    const phoneRegex = /^(?:\+94|0)?[0-9]{9}$/;
-    if (!phoneRegex.test(phoneNumber.replace(/\s/g, ""))) {
+    if (phoneNumber.length < 10) {
       return "Please enter a valid phone number.";
     }
 

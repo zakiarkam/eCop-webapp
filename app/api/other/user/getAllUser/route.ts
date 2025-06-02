@@ -10,7 +10,7 @@ export async function GET(request: Request) {
     const role = searchParams.get("role") || "";
     const isApproved = searchParams.get("isApproved");
 
-    let query: any = {};
+    const query: any = {};
 
     if (role) {
       query.role = role;

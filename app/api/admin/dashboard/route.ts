@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import License from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import Rule from "@/models/rule";
 import User from "@/models/users";
-import type { NextRequest } from "next/server";
 
 interface StatsResponse {
   success: boolean;
@@ -26,12 +24,8 @@ interface StatsResponse {
   message?: string;
 }
 
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<StatsResponse>> {
+export async function GET(): Promise<NextResponse<StatsResponse>> {
   try {
-    const session = await getServerSession();
-
     // if (!session) {
     //   return NextResponse.json(
     //     { success: false, message: "Unauthorized" },

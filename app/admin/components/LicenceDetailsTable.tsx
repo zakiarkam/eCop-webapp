@@ -238,7 +238,9 @@ export default function LicenceDetailsTable({
                   <th className="px-6 py-3 border font-semibold">
                     Licence Number
                   </th>
-                  <th className="px-6 py-3 border font-semibold">Issue Date</th>
+                  <th className="px-6 py-3 border  font-semibold">
+                    Issue Date
+                  </th>
                   <th className="px-6 py-3 border font-semibold">
                     Expiry Date
                   </th>
@@ -307,12 +309,12 @@ export default function LicenceDetailsTable({
                       <td className="px-6 py-4 border font-medium">
                         {entry.licenceNumber}
                       </td>
-                      <td className="px-6 py-4 border">
+                      <td className="px-6 py-4 truncate border">
                         {formatDate(entry.issueDate)}
                       </td>
-                      <td className="px-6 py-4 border">
+                      <td className="px-6 py-4 truncate border">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          className={`px-2 py-1 rounded-full text-xs truncate font-medium ${
                             new Date(entry.expiryDate) > new Date()
                               ? "bg-green-100 text-green-800"
                               : "bg-red-100 text-red-800"

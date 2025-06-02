@@ -157,7 +157,7 @@ export default function Settings() {
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6  ">
             <div className="text-sm text-gray-600">
               {userDetails.approvedAt && (
                 <p>
