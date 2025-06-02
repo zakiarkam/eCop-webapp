@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/context/UserContext";
 
 export default function PendingApproval() {
-  const { user, isLoading, isAuthenticated } = useUser();
+  const { user } = useUser();
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -47,7 +47,7 @@ export default function PendingApproval() {
             "Your account has been rejected by the administrator.",
             {
               variant: "error",
-              autoHideDuration: 5000,
+              autoHideDuration: 3000,
             }
           );
           // Navigate to login after showing rejection message
@@ -65,10 +65,8 @@ export default function PendingApproval() {
 
   useEffect(() => {
     if (
-      isAuthenticated &&
       user &&
       !userRejected &&
-      !isLoading &&
       !welcomeMessageShown.current &&
       !user.isApproved
     ) {
@@ -84,7 +82,7 @@ export default function PendingApproval() {
         checkUserStatus();
       }, 1000);
     }
-  }, [isAuthenticated, user, userRejected, isLoading]);
+  }, [user, userRejected]);
 
   useEffect(() => {
     if (user?.isApproved && !approvalMessageShown.current) {
@@ -107,6 +105,7 @@ export default function PendingApproval() {
         autoHideDuration: 2000,
       });
       await signOut({ callbackUrl: "/auth/login" });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       enqueueSnackbar("Error signing out. Please try again.", {
         variant: "error",
@@ -152,20 +151,6 @@ export default function PendingApproval() {
       setIsRefreshing(false);
     }, 2000);
   };
-
-  // Show loading state while checking authentication
-  if (isLoading) {
-    return (
-      <div className="font-[sans-serif] h-screen overflow-x-auto bg-white">
-        <div className="flex flex-col mt-16 items-center justify-center py-6 px-4">
-          <div className="text-center">
-            <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-[#15134A]" />
-            <p className="text-gray-600">Loading...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // If user is rejected, show rejection message
   if (userRejected) {

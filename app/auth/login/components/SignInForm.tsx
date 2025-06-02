@@ -78,16 +78,16 @@ export default function SignInForm() {
               Seamless Login for Exclusive Access
             </h2>
             <p className="text-sm mt-6 text-gray-800">
-              High Secured Data inside here. Don't try to access if you don't
-              have access.
+              High Secured Data inside here. Don&apos;t try to access if you
+              don&apos;t have access.
             </p>
             <p className="text-sm mt-12 text-gray-800">
-              Don't have an account{" "}
+              Don&apos;t have an account{" "}
               <a
                 href="/auth/signup"
                 className="text-[#6DB6FE] font-semibold hover:underline ml-1"
               >
-                Register here
+                Register here..
               </a>
             </p>
           </div>

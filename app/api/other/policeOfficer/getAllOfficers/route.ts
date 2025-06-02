@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import PoliceOfficer from "@/models/policeOfficer";
 import connectToDatabase from "@/lib/mongo/mongodb";
-import type { NextRequest } from "next/server";
 
 interface ApiResponse {
   success: boolean;
@@ -11,12 +9,8 @@ interface ApiResponse {
   total?: number;
 }
 
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse<ApiResponse>> {
+export async function GET(): Promise<NextResponse<ApiResponse>> {
   try {
-    const session = await getServerSession();
-
     await connectToDatabase();
 
     // Get all police officers

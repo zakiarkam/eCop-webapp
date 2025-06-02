@@ -212,8 +212,10 @@ export default function LicenceDetailsForm() {
 
   const handleCategoryDeselect = (category: string) => {
     setForm((prevForm) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [category]: removedIssue, ...remainingIssues } =
         prevForm.issueDatePerCategory;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { [category]: removedExpiry, ...remainingExpiries } =
         prevForm.expiryDatePerCategory;
       return {

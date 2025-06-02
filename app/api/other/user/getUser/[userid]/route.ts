@@ -6,10 +6,10 @@ await connectToDatabase();
 
 export async function GET(
   request: Request,
-  { params }: { params: { userid: string } }
+  { params }: { params: Promise<{ userid: string }> }
 ) {
   try {
-    const { userid } = params;
+    const { userid } = await params;
 
     if (!userid) {
       return NextResponse.json(

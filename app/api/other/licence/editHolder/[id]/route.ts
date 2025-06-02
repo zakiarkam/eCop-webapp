@@ -35,12 +35,12 @@ interface LicenceResponse {
 // GET single licence by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     await connectToDatabase();
 
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(
@@ -77,14 +77,14 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<LicenceResponse>> {
   try {
     const session = await getServerSession();
 
     await connectToDatabase();
 
-    const { id } = params;
+    const { id } = await params;
 
     if (!id) {
       return NextResponse.json(

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import Rule from "@/models/rule";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
@@ -13,13 +12,12 @@ type RuleRequestBody = {
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const session = await getServerSession();
     await connectToDatabase();
 
-    const { id } = params;
+    const { id } = await params;
     const body: RuleRequestBody = await request.json();
     const { section, provision, fine, points } = body;
 
