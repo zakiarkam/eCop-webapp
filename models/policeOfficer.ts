@@ -26,6 +26,11 @@ const policeOfficerSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    role: {
+      type: String,
+      default: "police",
+      enum: ["rmvAdmin", "admin", "licence", "police"],
+    },
     idNumber: {
       type: String,
       required: true,
@@ -66,7 +71,6 @@ const policeOfficerSchema = new mongoose.Schema(
         message: "Please enter a valid phone number",
       },
     },
-
     rank: {
       type: String,
       required: true,
@@ -97,6 +101,32 @@ const policeOfficerSchema = new mongoose.Schema(
       enum: ["active", "inactive", "suspended", "retired"],
       default: "active",
     },
+    // Authentication related fields
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+    },
+    temporaryPassword: {
+      type: String,
+    },
+    temporaryPasswordExpiry: {
+      type: Date,
+    },
+    isFirstTimeLogin: {
+      type: Boolean,
+      default: true,
+    },
+    hasLoggedIn: {
+      type: Boolean,
+      default: false,
+    },
+    lastLoginDate: {
+      type: Date,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -106,6 +136,43 @@ const policeOfficerSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Indexes for better query performance
+policeOfficerSchema.index({ policeNumber: 1 });
+policeOfficerSchema.index({ idNumber: 1 });
+policeOfficerSchema.index({ fullName: 1 });
+policeOfficerSchema.index({ status: 1 });
+policeOfficerSchema.index({ email: 1 });
+policeOfficerSchema.index({ policeStation: 1 });
+policeOfficerSchema.index({ district: 1 });
+policeOfficerSchema.index({ rank: 1 });
+
+// Virtual for checking if officer is retired based on age or status
+policeOfficerSchema.virtual("isRetired").get(function () {
+  return this.status === "retired" || this.age >= 60; // Assuming retirement age is 60
+});
+
+// Method to check if temporary password is expired
+policeOfficerSchema.methods.isTemporaryPasswordExpired = function () {
+  if (!this.temporaryPasswordExpiry) return true;
+  return new Date() > this.temporaryPasswordExpiry;
+};
+
+// Method to check if officer is active and can perform duties
+policeOfficerSchema.methods.canPerformDuties = function () {
+  return this.status === "active" && !this.isRetired;
+};
+
+// Method to get officer's full identification
+policeOfficerSchema.methods.getFullIdentification = function () {
+  return {
+    name: this.fullName,
+    policeNumber: this.policeNumber,
+    rank: this.rank,
+    station: this.policeStation,
+    badgeNo: this.badgeNo,
+  };
+};
 
 const PoliceOfficer =
   mongoose.models?.PoliceOfficer ||

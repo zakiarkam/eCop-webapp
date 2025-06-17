@@ -28,6 +28,7 @@ interface LicenceResponse {
     fullName: string;
     licenceNumber: string;
     idNumber: string;
+    role: string;
   };
   errors?: string[];
 }
@@ -134,6 +135,7 @@ export async function POST(
       currentAddress,
       bloodGroup,
       vehicleCategories: transformedVehicleCategories,
+      role: "licence",
       createdBy: session?.user?.id || null,
     });
 
@@ -147,6 +149,7 @@ export async function POST(
           fullName: savedLicense.fullName,
           licenceNumber: savedLicense.licenceNumber,
           idNumber: savedLicense.idNumber,
+          role: savedLicense.role,
         },
       },
       { status: 201 }
