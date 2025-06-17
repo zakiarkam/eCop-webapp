@@ -306,7 +306,7 @@ export default function EditLicenceModal({
         updateData
       );
 
-      if (result.license) {
+      if (result.licence) {
         enqueueSnackbar("Licence updated successfully", { variant: "success" });
 
         // Fetch updated data

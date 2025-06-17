@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
 
@@ -23,7 +23,7 @@ interface LicenceRequestBody {
 
 interface LicenceResponse {
   message: string;
-  license?: {
+  licence?: {
     id: string;
     fullName: string;
     licenceNumber: string;
@@ -88,15 +88,15 @@ export async function POST(
       );
     }
 
-    const existingLicense = await License.findOne({
+    const existingLicence = await Licence.findOne({
       $or: [{ idNumber }, { licenceNumber }],
     });
 
-    if (existingLicense) {
+    if (existingLicence) {
       return NextResponse.json(
         {
           message:
-            existingLicense.idNumber === idNumber
+            existingLicence.idNumber === idNumber
               ? "A licence with this ID number already exists"
               : "A licence with this licence number already exists",
         },
@@ -122,7 +122,7 @@ export async function POST(
       }
     }
 
-    const newLicense = new License({
+    const newLicence = new Licence({
       fullName,
       nameWithInitials,
       dob: new Date(dob),
@@ -139,17 +139,17 @@ export async function POST(
       createdBy: session?.user?.id || null,
     });
 
-    const savedLicense = await newLicense.save();
+    const savedLicence = await newLicence.save();
 
     return NextResponse.json(
       {
         message: "Licence created successfully",
-        license: {
-          id: savedLicense._id,
-          fullName: savedLicense.fullName,
-          licenceNumber: savedLicense.licenceNumber,
-          idNumber: savedLicense.idNumber,
-          role: savedLicense.role,
+        licence: {
+          id: savedLicence._id,
+          fullName: savedLicence.fullName,
+          licenceNumber: savedLicence.licenceNumber,
+          idNumber: savedLicence.idNumber,
+          role: savedLicence.role,
         },
       },
       { status: 201 }

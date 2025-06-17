@@ -7,7 +7,7 @@ import licenceService, {
   CreateLicenceData,
 } from "@/services/apiServices/licenceApi";
 
-type LicenseFormType = {
+type LicenceFormType = {
   fullName: string;
   nameWithInitials: string;
   dob: string;
@@ -28,7 +28,7 @@ export default function LicenceDetailsForm() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { user } = useUser();
-  const [form, setForm] = useState<LicenseFormType>({
+  const [form, setForm] = useState<LicenceFormType>({
     fullName: "",
     nameWithInitials: "",
     dob: "",
@@ -147,7 +147,7 @@ export default function LicenceDetailsForm() {
       );
 
       enqueueSnackbar(
-        `Licence created successfully! Licence ID: ${result.license?.id}`,
+        `Licence created successfully! Licence ID: ${result.licence?.id}`,
         { variant: "success" }
       );
 

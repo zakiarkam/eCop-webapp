@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
 
@@ -32,9 +32,9 @@ export async function GET(
       );
     }
 
-    const license = await License.findById(id);
+    const licence = await Licence.findById(id);
 
-    if (!license) {
+    if (!licence) {
       return NextResponse.json(
         {
           success: false,
@@ -47,7 +47,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: true,
-        data: license,
+        data: licence,
         message: "Licence retrieved successfully",
       },
       { status: 200 }

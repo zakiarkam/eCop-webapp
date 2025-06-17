@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
 
@@ -19,7 +19,7 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          message: "License ID is required",
+          message: "Licence ID is required",
         },
         { status: 400 }
       );
@@ -27,14 +27,14 @@ export async function DELETE(
 
     await connectToDatabase();
 
-    // Find and delete the license
-    const deletedLicense = await License.findByIdAndDelete(id);
+    // Find and delete the licence
+    const deletedLicence = await Licence.findByIdAndDelete(id);
 
-    if (!deletedLicense) {
+    if (!deletedLicence) {
       return NextResponse.json(
         {
           success: false,
-          message: "License not found",
+          message: "Licence not found",
         },
         { status: 404 }
       );
@@ -43,18 +43,18 @@ export async function DELETE(
     return NextResponse.json(
       {
         success: true,
-        message: "License deleted successfully",
+        message: "Licence deleted successfully",
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Error deleting license:", error);
+    console.error("Error deleting licence:", error);
 
     if (error.name === "CastError") {
       return NextResponse.json(
         {
           success: false,
-          message: "Invalid license ID format",
+          message: "Invalid licence ID format",
         },
         { status: 400 }
       );

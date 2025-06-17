@@ -23,7 +23,7 @@ export interface ApiResponse<T = any> {
   data?: T;
   message?: string;
   total?: number;
-  license?: {
+  licence?: {
     id: string;
     fullName: string;
     licenceNumber: string;

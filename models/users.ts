@@ -79,7 +79,7 @@ const userSchema = new mongoose.Schema({
   image: {
     type: String,
   },
-  licenseNumber: {
+  licenceNumber: {
     type: String,
   },
   policeNumber: {

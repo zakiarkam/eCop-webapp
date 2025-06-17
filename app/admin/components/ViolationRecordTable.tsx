@@ -4,7 +4,7 @@ import { Edit, Trash2 } from "lucide-react";
 
 type ViolationRecord = {
   username: string;
-  licenseNumber: string;
+  licenceNumber: string;
   vehicleNumber: string;
   mobileNumber: string;
   sectionOfAct: string;
@@ -29,7 +29,7 @@ export default function ViolationRecordsTable({
   const [data] = useState<ViolationRecord[]>([
     {
       username: "John Doe",
-      licenseNumber: "B1234567",
+      licenceNumber: "B1234567",
       vehicleNumber: "CAR-1234",
       mobileNumber: "+94771234567",
       sectionOfAct: "Section 151",
@@ -43,7 +43,7 @@ export default function ViolationRecordsTable({
     },
     {
       username: "Jane Smith",
-      licenseNumber: "B7654321",
+      licenceNumber: "B7654321",
       vehicleNumber: "CAB-5678",
       mobileNumber: "+94777654321",
       sectionOfAct: "Section 140",
@@ -172,7 +172,7 @@ export default function ViolationRecordsTable({
                         <div>
                           <div className="font-medium">{record.username}</div>
                           <div className="text-gray-600">
-                            {record.licenseNumber}
+                            {record.licenceNumber}
                           </div>
                           <div className="text-gray-600">
                             {record.mobileNumber}
