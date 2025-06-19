@@ -26,6 +26,9 @@ interface LoginResponse {
       userType: string;
       status: string;
       licenceNumber?: string;
+      idNumber: string;
+      issueDate?: string;
+      expiryDate?: string;
       vehicleCategories?: Array<{
         category: string;
         issueDate: string;
@@ -192,10 +195,13 @@ export async function POST(request: NextRequest) {
       role: user.role || userType,
       userType: userType,
       status: user.status,
+      idNumber: user.idNumber,
     };
 
     if (userType === "licence") {
       userData.licenceNumber = user.licenceNumber;
+      userData.issueDate = user.issueDate;
+      userData.expiryDate = user.expiryDate;
       userData.vehicleCategories =
         user.vehicleCategories?.map((vc: any) => ({
           category: vc.category,
