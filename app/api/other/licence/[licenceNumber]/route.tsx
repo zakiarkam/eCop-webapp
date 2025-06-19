@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
 
-interface LicenseDetailResponse {
+interface LicenceDetailResponse {
   message: string;
-  license?: {
+  licence?: {
     id: string;
     fullName: string;
     nameWithInitials: string;
@@ -33,7 +33,7 @@ interface LicenseDetailResponse {
 export async function GET(
   request: NextRequest,
   { params }: { params: { licenceNumber: string } }
-): Promise<NextResponse<LicenseDetailResponse>> {
+): Promise<NextResponse<LicenceDetailResponse>> {
   try {
     const session = await getServerSession();
 
@@ -56,17 +56,17 @@ export async function GET(
       );
     }
 
-    const license = await License.findOne({ licenceNumber });
+    const licence = await Licence.findOne({ licenceNumber });
 
-    if (!license) {
+    if (!licence) {
       return NextResponse.json(
-        { message: "License not found" },
+        { message: "Licence not found" },
         { status: 404 }
       );
     }
 
     // Transform vehicle categories for response
-    const transformedCategories = license.vehicleCategories.map((cat: any) => ({
+    const transformedCategories = licence.vehicleCategories.map((cat: any) => ({
       category: cat.category,
       issueDate: cat.issueDate.toISOString().split("T")[0],
       expiryDate: cat.expiryDate.toISOString().split("T")[0],
@@ -74,30 +74,30 @@ export async function GET(
 
     return NextResponse.json(
       {
-        message: "License found successfully",
-        license: {
-          id: license._id.toString(),
-          fullName: license.fullName,
-          nameWithInitials: license.nameWithInitials,
-          dob: license.dob.toISOString().split("T")[0],
-          age: license.age,
-          issueDate: license.issueDate.toISOString().split("T")[0],
-          expiryDate: license.expiryDate.toISOString().split("T")[0],
-          idNumber: license.idNumber,
-          licenceNumber: license.licenceNumber,
-          permanentAddress: license.permanentAddress,
-          currentAddress: license.currentAddress,
-          bloodGroup: license.bloodGroup,
+        message: "Licence found successfully",
+        licence: {
+          id: licence._id.toString(),
+          fullName: licence.fullName,
+          nameWithInitials: licence.nameWithInitials,
+          dob: licence.dob.toISOString().split("T")[0],
+          age: licence.age,
+          issueDate: licence.issueDate.toISOString().split("T")[0],
+          expiryDate: licence.expiryDate.toISOString().split("T")[0],
+          idNumber: licence.idNumber,
+          licenceNumber: licence.licenceNumber,
+          permanentAddress: licence.permanentAddress,
+          currentAddress: licence.currentAddress,
+          bloodGroup: licence.bloodGroup,
           vehicleCategories: transformedCategories,
-          role: license.role,
-          createdAt: license.createdAt?.toISOString() || "",
-          updatedAt: license.updatedAt?.toISOString() || "",
+          role: licence.role,
+          createdAt: licence.createdAt?.toISOString() || "",
+          updatedAt: licence.updatedAt?.toISOString() || "",
         },
       },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error("Error retrieving license:", error);
+    console.error("Error retrieving licence:", error);
 
     return NextResponse.json(
       { message: "Internal Server Error" },

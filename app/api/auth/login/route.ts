@@ -1,12 +1,11 @@
-// app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import bcrypt from "bcryptjs";
 
 interface LoginRequest {
-  identificationNo: string; // Changed from licenceNo to identificationNo
+  identificationNo: string;
   password: string;
 }
 
@@ -15,25 +14,26 @@ interface LoginResponse {
   message: string;
   data?: {
     fullName: string;
-    userId: string; // Changed from licenseId to userId
-    userType: string; // Added userType
+    userId: string;
+    userType: string;
     token?: string;
     user: {
       fullName: string;
       nameWithInitials: string;
-      identificationNo: string; // Generic identification number
+      identificationNo: string;
       email: string;
       role: string;
       userType: string;
       status: string;
-      // License specific fields (optional)
       licenceNumber?: string;
+      idNumber: string;
+      issueDate?: string;
+      expiryDate?: string;
       vehicleCategories?: Array<{
         category: string;
         issueDate: string;
         expiryDate: string;
       }>;
-      // Police specific fields (optional)
       policeNumber?: string;
       rank?: string;
       policeStation?: string;
@@ -42,23 +42,22 @@ interface LoginResponse {
   };
 }
 
-// Helper function to find user by identification number (same as first-time-login)
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
-    // First try to find in License collection
-    const license = await License.findOne({
+    // First try to find in Licence collection
+    const licence = await Licence.findOne({
       licenceNumber: identificationNo,
     });
 
-    if (license) {
+    if (licence) {
       return {
-        user: license,
-        userType: "license",
-        model: License,
+        user: licence,
+        userType: "licence",
+        model: Licence,
       };
     }
 
-    // If not found in License, try Police collection
+    // If not found in Licence, try Police collection
     const policeOfficer = await PoliceOfficer.findOne({
       policeNumber: identificationNo,
     });
@@ -82,7 +81,6 @@ export async function POST(request: NextRequest) {
   try {
     console.log("=== LOGIN API CALLED ===");
 
-    // Parse request body
     let body: LoginRequest;
     try {
       body = await request.json();
@@ -104,7 +102,6 @@ export async function POST(request: NextRequest) {
 
     const { identificationNo, password } = body;
 
-    // Validate input
     if (!identificationNo || !password) {
       return NextResponse.json(
         {
@@ -115,7 +112,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by identification number
     console.log("Searching for user:", identificationNo);
     const userResult = await findUserByIdentificationNo(identificationNo);
 
@@ -133,7 +129,6 @@ export async function POST(request: NextRequest) {
     const { user, userType, model } = userResult;
     console.log("User found:", user._id, "userType:", userType);
 
-    // Check if user has completed first-time login
     if (!user.hasLoggedIn || !user.password) {
       console.log("Account not activated - first time login required");
       return NextResponse.json(
@@ -146,7 +141,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user account is active
     if (user.status !== "active") {
       console.log("User account not active:", user.status);
       return NextResponse.json(
@@ -158,21 +152,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Additional checks for license holders (check expiry)
-    if (userType === "license" && user.expiryDate) {
+    // Additional checks for licence holders (check expiry)
+    if (userType === "licence" && user.expiryDate) {
       if (new Date() > user.expiryDate) {
-        console.log("License expired");
+        console.log("Licence expired");
         return NextResponse.json(
           {
             success: false,
-            message: "Your license has expired. Please renew your license.",
+            message: "Your licence has expired. Please renew your licence.",
           },
           { status: 401 }
         );
       }
     }
 
-    // Verify password
     console.log("Verifying password...");
     const isValidPassword = await bcrypt.compare(password, user.password);
 
@@ -193,21 +186,22 @@ export async function POST(request: NextRequest) {
       lastLoginDate: new Date(),
     });
 
-    // Prepare user data based on user type
     let userData: any = {
       fullName: user.fullName,
       nameWithInitials: user.nameWithInitials,
       identificationNo:
-        userType === "license" ? user.licenceNumber : user.policeNumber,
+        userType === "licence" ? user.licenceNumber : user.policeNumber,
       email: user.email,
-      role: user.role || userType, // Use role if available, otherwise use userType
+      role: user.role || userType,
       userType: userType,
       status: user.status,
+      idNumber: user.idNumber,
     };
 
-    // Add type-specific fields
-    if (userType === "license") {
+    if (userType === "licence") {
       userData.licenceNumber = user.licenceNumber;
+      userData.issueDate = user.issueDate;
+      userData.expiryDate = user.expiryDate;
       userData.vehicleCategories =
         user.vehicleCategories?.map((vc: any) => ({
           category: vc.category,
@@ -267,7 +261,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,

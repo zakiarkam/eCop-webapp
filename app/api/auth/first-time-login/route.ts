@@ -1,6 +1,5 @@
-// app/api/auth/first-time-login/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import {
@@ -10,7 +9,7 @@ import {
 import bcrypt from "bcryptjs";
 
 interface FirstTimeLoginRequest {
-  identificationNo: string; // This will be either licenceNumber or policeNumber
+  identificationNo: string;
   email: string;
 }
 
@@ -23,23 +22,20 @@ interface FirstTimeLoginResponse {
   };
 }
 
-// Helper function to find user by identification number
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
-    // First try to find in License collection
-    const license = await License.findOne({
+    const licence = await Licence.findOne({
       licenceNumber: identificationNo,
     });
 
-    if (license) {
+    if (licence) {
       return {
-        user: license,
-        userType: "license",
-        model: License,
+        user: licence,
+        userType: "licence",
+        model: Licence,
       };
     }
 
-    // If not found in License, try Police collection
     const policeOfficer = await PoliceOfficer.findOne({
       policeNumber: identificationNo,
     });
@@ -63,7 +59,6 @@ export async function POST(request: NextRequest) {
   try {
     console.log("First time login POST request received");
 
-    // Parse request body
     let body: FirstTimeLoginRequest;
     try {
       body = await request.json();
@@ -114,7 +109,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by identification number
     console.log("Searching for user:", identificationNo);
     const userResult = await findUserByIdentificationNo(identificationNo);
 
@@ -139,7 +133,6 @@ export async function POST(request: NextRequest) {
       user.hasLoggedIn
     );
 
-    // Check if user has already logged in before
     if (user.hasLoggedIn) {
       return NextResponse.json(
         {
@@ -151,11 +144,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if user is active (for license holders, check status; for police officers, check status)
     if (user.status !== "active") {
       const statusMessage =
-        userType === "license"
-          ? "This license is not active. Please contact support."
+        userType === "licence"
+          ? "This licence is not active. Please contact support."
           : "This police officer account is not active. Please contact support.";
 
       return NextResponse.json(
@@ -167,16 +159,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate temporary password
     console.log("Generating temporary password");
     const temporaryPassword = generateTemporaryPassword();
     const hashedTempPassword = await bcrypt.hash(temporaryPassword, 12);
 
-    // Set temporary password expiry (15 minutes)
     const tempPasswordExpiry = new Date();
     tempPasswordExpiry.setMinutes(tempPasswordExpiry.getMinutes() + 15);
 
-    // Update user with email and temporary password
     console.log("Updating user with temporary password");
     await model.findByIdAndUpdate(user._id, {
       email: email.toLowerCase(),
@@ -184,7 +173,6 @@ export async function POST(request: NextRequest) {
       temporaryPasswordExpiry: tempPasswordExpiry,
     });
 
-    // Send email with temporary password
     console.log("Sending temporary password email to:", email);
     const emailSent = await sendTemporaryPasswordEmail(
       email,
@@ -247,7 +235,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,

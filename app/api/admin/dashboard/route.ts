@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongo/mongodb";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import Rule from "@/models/rule";
 import User from "@/models/users";
@@ -8,15 +8,15 @@ import User from "@/models/users";
 interface StatsResponse {
   success: boolean;
   data?: {
-    totalLicenses: number;
+    totalLicences: number;
     totalPoliceOfficers: number;
     totalRules: number;
     totalUsers: number;
     pendingApprovals: number;
     activeRules: number;
-    expiringSoonLicenses: number;
+    expiringSoonLicences: number;
     recentActivity: {
-      newLicensesThisMonth: number;
+      newLicencesThisMonth: number;
       newOfficersThisMonth: number;
       newUsersThisMonth: number;
     };
@@ -45,27 +45,27 @@ export async function GET(): Promise<NextResponse<StatsResponse>> {
     thirtyDaysFromNow.setDate(currentDate.getDate() + 30);
 
     const [
-      totalLicenses,
+      totalLicences,
       totalPoliceOfficers,
       totalRules,
       totalUsers,
       pendingApprovals,
       activeRules,
-      expiringSoonLicenses,
-      newLicensesThisMonth,
+      expiringSoonLicences,
+      newLicencesThisMonth,
       newOfficersThisMonth,
       newUsersThisMonth,
     ] = await Promise.all([
-      License.countDocuments(),
+      Licence.countDocuments(),
       PoliceOfficer.countDocuments(),
       Rule.countDocuments(),
       User.countDocuments(),
       User.countDocuments({ isApproved: false }),
       Rule.countDocuments({ status: "active" }),
-      License.countDocuments({
+      Licence.countDocuments({
         expiryDate: { $lte: thirtyDaysFromNow, $gte: currentDate },
       }),
-      License.countDocuments({
+      Licence.countDocuments({
         createdAt: { $gte: firstDayOfMonth },
       }),
       PoliceOfficer.countDocuments({
@@ -80,15 +80,15 @@ export async function GET(): Promise<NextResponse<StatsResponse>> {
       {
         success: true,
         data: {
-          totalLicenses,
+          totalLicences,
           totalPoliceOfficers,
           totalRules,
           totalUsers,
           pendingApprovals,
           activeRules,
-          expiringSoonLicenses,
+          expiringSoonLicences,
           recentActivity: {
-            newLicensesThisMonth,
+            newLicencesThisMonth,
             newOfficersThisMonth,
             newUsersThisMonth,
           },

@@ -1,12 +1,11 @@
-// app/api/auth/set-new-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import bcrypt from "bcryptjs";
 
 interface SetNewPasswordRequest {
-  identificationNo: string; // This will be either licenceNumber or policeNumber
+  identificationNo: string;
   newPassword: string;
   confirmPassword: string;
 }
@@ -16,23 +15,20 @@ interface SetNewPasswordResponse {
   message: string;
 }
 
-// Helper function to find user by identification number
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
-    // First try to find in License collection
-    const license = await License.findOne({
+    const licence = await Licence.findOne({
       licenceNumber: identificationNo,
     });
 
-    if (license) {
+    if (licence) {
       return {
-        user: license,
-        userType: "license",
-        model: License,
+        user: licence,
+        userType: "licence",
+        model: Licence,
       };
     }
 
-    // If not found in License, try Police collection
     const policeOfficer = await PoliceOfficer.findOne({
       policeNumber: identificationNo,
     });
@@ -103,7 +99,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Password validation
     if (newPassword.length < 8) {
       return NextResponse.json(
         {
@@ -143,11 +138,9 @@ export async function POST(request: NextRequest) {
     const { user, userType, model } = userResult;
     console.log("User found:", user._id, "userType:", userType);
 
-    // Hash new password
     console.log("Hashing new password...");
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    // Update user with new password and mark as logged in
     console.log("Updating user with new password...");
     await model.findByIdAndUpdate(user._id, {
       password: hashedPassword,
@@ -178,7 +171,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,

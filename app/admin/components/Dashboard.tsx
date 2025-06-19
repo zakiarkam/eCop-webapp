@@ -104,11 +104,11 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard
-          title="Total Licenses"
-          value={stats.totalLicenses}
+          title="Total Licences"
+          value={stats.totalLicences}
           icon={<Car className="w-6 h-6 text-white" />}
           color="bg-blue-500"
-          trend={stats.recentActivity.newLicensesThisMonth}
+          trend={stats.recentActivity.newLicencesThisMonth}
         />
         <StatCard
           title="Police Officers"
@@ -142,10 +142,10 @@ const Dashboard: React.FC = () => {
         />
         <AlertCard
           title="Expiring Soon"
-          value={stats.expiringSoonLicenses}
+          value={stats.expiringSoonLicences}
           icon={<AlertTriangle className="w-6 h-6 text-white" />}
           color="bg-red-500"
-          description="Licenses expiring in 30 days"
+          description="Licences expiring in 30 days"
         />
       </div>
 
@@ -157,9 +157,9 @@ const Dashboard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center p-4 bg-blue-50 rounded-lg">
             <Car className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-            <h3 className="font-semibold text-blue-900">New Licenses</h3>
+            <h3 className="font-semibold text-blue-900">New Licences</h3>
             <p className="text-2xl font-bold text-blue-600">
-              {stats.recentActivity.newLicensesThisMonth}
+              {stats.recentActivity.newLicencesThisMonth}
             </p>
             <p className="text-sm text-blue-700">This month</p>
           </div>

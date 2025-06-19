@@ -1,12 +1,12 @@
 // app/api/auth/verify-temp-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import bcrypt from "bcryptjs";
 
 interface VerifyTempPasswordRequest {
-  identificationNo: string; // This will be either licenceNumber or policeNumber
+  identificationNo: string;
   temporaryPassword: string;
 }
 
@@ -20,23 +20,22 @@ interface VerifyTempPasswordResponse {
   };
 }
 
-// Helper function to find user by identification number
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
-    // First try to find in License collection
-    const license = await License.findOne({
+    // First try to find in Licence collection
+    const licence = await Licence.findOne({
       licenceNumber: identificationNo,
     });
 
-    if (license) {
+    if (licence) {
       return {
-        user: license,
-        userType: "license",
-        model: License,
+        user: licence,
+        userType: "licence",
+        model: Licence,
       };
     }
 
-    // If not found in License, try Police collection
+    // If not found in Licence, try Police collection
     const policeOfficer = await PoliceOfficer.findOne({
       policeNumber: identificationNo,
     });
@@ -60,7 +59,6 @@ export async function POST(request: NextRequest) {
   try {
     console.log("=== VERIFY TEMP PASSWORD API CALLED ===");
 
-    // Parse request body
     let body: VerifyTempPasswordRequest;
     try {
       body = await request.json();
@@ -93,7 +91,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by identification number
     console.log("Searching for user:", identificationNo);
     const userResult = await findUserByIdentificationNo(identificationNo);
 
@@ -123,7 +120,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if temporary password has expired
     if (
       user.temporaryPasswordExpiry &&
       new Date() > new Date(user.temporaryPasswordExpiry)
@@ -138,7 +134,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify temporary password
     console.log("Verifying temporary password...");
     const isValidTempPassword = await bcrypt.compare(
       temporaryPassword,
@@ -181,7 +176,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Handle OPTIONS for CORS
 export async function OPTIONS(request: NextRequest) {
   return new NextResponse(null, {
     status: 200,
