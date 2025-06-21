@@ -16,6 +16,8 @@ interface LicenceRequestBody {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -55,6 +57,8 @@ export async function POST(
       permanentAddress,
       currentAddress,
       bloodGroup,
+      phoneNumber,
+      licencePoints,
       vehicleCategories,
       issueDatePerCategory,
       expiryDatePerCategory,
@@ -72,6 +76,8 @@ export async function POST(
       !permanentAddress ||
       !currentAddress ||
       !bloodGroup ||
+      !phoneNumber ||
+      !licencePoints ||
       !vehicleCategories ||
       vehicleCategories.length === 0
     ) {
@@ -134,6 +140,8 @@ export async function POST(
       permanentAddress,
       currentAddress,
       bloodGroup,
+      phoneNumber,
+      licencePoints,
       vehicleCategories: transformedVehicleCategories,
       role: "licence",
       createdBy: session?.user?.id || null,

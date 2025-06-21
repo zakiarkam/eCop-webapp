@@ -19,6 +19,8 @@ type LicenceFormType = {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: { [key: string]: string };
   expiryDatePerCategory: { [key: string]: string };
@@ -40,6 +42,8 @@ export default function LicenceDetailsForm() {
     permanentAddress: "",
     currentAddress: "",
     bloodGroup: "",
+    phoneNumber: "",
+    licencePoints: 0,
     vehicleCategories: [],
     issueDatePerCategory: {},
     expiryDatePerCategory: {},
@@ -76,6 +80,8 @@ export default function LicenceDetailsForm() {
       permanentAddress,
       currentAddress,
       bloodGroup,
+      phoneNumber,
+      licencePoints,
       vehicleCategories,
       issueDatePerCategory,
       expiryDatePerCategory,
@@ -93,9 +99,21 @@ export default function LicenceDetailsForm() {
       !permanentAddress ||
       !currentAddress ||
       !bloodGroup ||
+      !phoneNumber ||
+      !licencePoints ||
       vehicleCategories.length === 0
     ) {
       return "All fields are required.";
+    }
+
+    const ageNumber = parseInt(age);
+    if (ageNumber < 18) {
+      return "Age must be 18 or above to obtain a driving licence.";
+    }
+
+    const points = licencePoints;
+    if (isNaN(points) || points < 0 || points > 100) {
+      return "Licence points must be a number between 0 and 100.";
     }
 
     for (const category of vehicleCategories) {
@@ -163,6 +181,8 @@ export default function LicenceDetailsForm() {
         permanentAddress: "",
         currentAddress: "",
         bloodGroup: "",
+        phoneNumber: "",
+        licencePoints: 0,
         vehicleCategories: [],
         issueDatePerCategory: {},
         expiryDatePerCategory: {},
@@ -201,10 +221,13 @@ export default function LicenceDetailsForm() {
       setForm((prevForm) => ({
         ...prevForm,
         vehicleCategories: [...prevForm.vehicleCategories, value],
-        issueDatePerCategory: { ...prevForm.issueDatePerCategory, [value]: "" },
+        issueDatePerCategory: {
+          ...prevForm.issueDatePerCategory,
+          [value]: prevForm.issueDate || "",
+        },
         expiryDatePerCategory: {
           ...prevForm.expiryDatePerCategory,
-          [value]: "",
+          [value]: prevForm.expiryDate || "",
         },
       }));
     }
@@ -332,49 +355,17 @@ export default function LicenceDetailsForm() {
                   readOnly
                 />
               </div>
+
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  Blood Group <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="bloodGroup"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  value={form.bloodGroup}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Blood Group</option>
-                  {bloodGroupOptions.map((group) => (
-                    <option key={group} value={group}>
-                      {group}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Date of Issue of the licence{" "}
-                  <span className="text-red-500">*</span>
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
-                  name="issueDate"
-                  type="date"
+                  name="phoneNumber"
+                  type="tel"
                   className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  value={form.issueDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Date of Expiry of the licence{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="expiryDate"
-                  type="date"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  value={form.expiryDate}
+                  placeholder="Enter phone number"
+                  value={form.phoneNumber}
                   onChange={handleChange}
                   required
                 />
@@ -390,20 +381,6 @@ export default function LicenceDetailsForm() {
                   className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
                   placeholder="Enter ID number"
                   value={form.idNumber}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Licence Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="licenceNumber"
-                  type="text"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  placeholder="Enter licence number"
-                  value={form.licenceNumber}
                   onChange={handleChange}
                   required
                 />
@@ -436,6 +413,87 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Blood Group <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="bloodGroup"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.bloodGroup}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Blood Group</option>
+                  {bloodGroupOptions.map((group) => (
+                    <option key={group} value={group}>
+                      {group}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Licence Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="licenceNumber"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter licence number"
+                  value={form.licenceNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Date of Issue of the licence{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="issueDate"
+                  type="date"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.issueDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Date of Expiry of the licence{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="expiryDate"
+                  type="date"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.expiryDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Licence Points <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="licencePoints"
+                  type="number"
+                  min="0"
+                  max="100"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter licence points (0-100)"
+                  value={form.licencePoints}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
               {/* Vehicle Categories */}
               <div className="relative">
                 <label className="text-gray-800 text-sm mb-2 block">

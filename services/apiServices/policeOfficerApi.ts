@@ -14,6 +14,7 @@ export interface PoliceOfficerFormData {
   joiningDate: string;
   bloodGroup: string;
   age: string;
+  policePoints: string;
 }
 
 export interface PoliceOfficer extends PoliceOfficerFormData {

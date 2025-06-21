@@ -57,6 +57,7 @@ export default function PoliceOfficerDetailsForm() {
     rank: "",
     joiningDate: "",
     bloodGroup: "",
+    policePoints: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -182,6 +183,7 @@ export default function PoliceOfficerDetailsForm() {
         rank: "",
         joiningDate: "",
         bloodGroup: "",
+        policePoints: "",
       });
 
       console.log("Police Officer created successfully:", result);

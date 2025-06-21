@@ -33,6 +33,7 @@ export async function GET(): Promise<NextResponse<ApiResponse>> {
       badgeNo: officer.badgeNo,
       phoneNumber: officer.phoneNumber,
       rank: officer.rank,
+      policePoints: officer.policePoints,
       joiningDate: officer.joiningDate,
       bloodGroup: officer.bloodGroup,
       createdAt: officer.createdAt,

@@ -26,6 +26,9 @@ interface LoginResponse {
       userType: string;
       status: string;
       licenceNumber?: string;
+      phoneNumber: string;
+      licencePoints?: number;
+      policePoints?: number;
       idNumber: string;
       issueDate?: string;
       expiryDate?: string;
@@ -196,12 +199,15 @@ export async function POST(request: NextRequest) {
       userType: userType,
       status: user.status,
       idNumber: user.idNumber,
+      phoneNumber: user.phoneNumber,
     };
 
     if (userType === "licence") {
       userData.licenceNumber = user.licenceNumber;
       userData.issueDate = user.issueDate;
       userData.expiryDate = user.expiryDate;
+      userData.licencePoints = user.licencePoints;
+
       userData.vehicleCategories =
         user.vehicleCategories?.map((vc: any) => ({
           category: vc.category,
@@ -213,6 +219,7 @@ export async function POST(request: NextRequest) {
       userData.rank = user.rank;
       userData.policeStation = user.policeStation;
       userData.badgeNo = user.badgeNo;
+      userData.policePoints = user.policePoints;
     }
 
     console.log("Login successful");

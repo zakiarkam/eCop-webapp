@@ -234,9 +234,15 @@ export default function LicenceDetailsTable({
                   <th className="px-6 py-3 border font-semibold">
                     Current Address
                   </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Phone Number
+                  </th>
                   <th className="px-6 py-3 border font-semibold">ID Number</th>
                   <th className="px-6 py-3 border font-semibold">
                     Licence Number
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Licence Points
                   </th>
                   <th className="px-6 py-3 border  font-semibold">
                     Issue Date
@@ -305,10 +311,16 @@ export default function LicenceDetailsTable({
                           {entry.currentAddress}
                         </div>
                       </td>
+                      <td className="px-6 py-4 border">{entry.phoneNumber}</td>
+
                       <td className="px-6 py-4 border">{entry.idNumber}</td>
                       <td className="px-6 py-4 border font-medium">
                         {entry.licenceNumber}
                       </td>
+                      <td className="px-6 py-4 border">
+                        {entry.licencePoints}
+                      </td>
+
                       <td className="px-6 py-4 truncate border">
                         {formatDate(entry.issueDate)}
                       </td>

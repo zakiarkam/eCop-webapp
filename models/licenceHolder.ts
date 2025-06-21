@@ -97,6 +97,19 @@ const licenceSchema = new mongoose.Schema(
       enum: ["active", "expired", "suspended", "revoked"],
       default: "active",
     },
+
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    licencePoints: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      max: 200,
+    },
     // Authentication related fields
     email: {
       type: String,

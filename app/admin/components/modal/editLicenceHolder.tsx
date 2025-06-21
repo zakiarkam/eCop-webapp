@@ -26,6 +26,8 @@ interface FormData {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -72,6 +74,8 @@ export default function EditLicenceModal({
     permanentAddress: "",
     currentAddress: "",
     bloodGroup: "",
+    phoneNumber: "",
+    licencePoints: 0,
     vehicleCategories: [],
     issueDatePerCategory: {},
     expiryDatePerCategory: {},
@@ -131,6 +135,8 @@ export default function EditLicenceModal({
           permanentAddress: licence.permanentAddress || "",
           currentAddress: licence.currentAddress || "",
           bloodGroup: licence.bloodGroup || "",
+          phoneNumber: licence.phoneNumber || "",
+          licencePoints: licence.licencePoints,
           vehicleCategories: categories,
           issueDatePerCategory: issueDates,
           expiryDatePerCategory: expiryDates,
@@ -296,6 +302,8 @@ export default function EditLicenceModal({
         permanentAddress: formData.permanentAddress,
         currentAddress: formData.currentAddress,
         bloodGroup: formData.bloodGroup,
+        phoneNumber: formData.phoneNumber,
+        licencePoints: formData.licencePoints,
         vehicleCategories: formData.vehicleCategories,
         issueDatePerCategory: formData.issueDatePerCategory,
         expiryDatePerCategory: formData.expiryDatePerCategory,
@@ -427,6 +435,21 @@ export default function EditLicenceModal({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="phoneNumber"
+                    type="tel"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter phone number"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     ID Number <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -451,6 +474,23 @@ export default function EditLicenceModal({
                     onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Licence Points <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="licencePoints"
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter licence points (0-100)"
+                    value={formData.licencePoints}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
 
