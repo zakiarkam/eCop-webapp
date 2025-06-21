@@ -15,6 +15,8 @@ interface LicenceData {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: Array<{
     category: string;
     issueDate: string;
@@ -53,6 +55,8 @@ export async function GET(): Promise<NextResponse<LicenceResponse>> {
       permanentAddress: licence.permanentAddress,
       currentAddress: licence.currentAddress,
       bloodGroup: licence.bloodGroup,
+      phoneNumber: licence.phoneNumber,
+      licencePoints: licence.licencePoints,
       vehicleCategories: licence.vehicleCategories.map((vc: any) => ({
         category: vc.category,
         issueDate: vc.issueDate.toISOString().split("T")[0],

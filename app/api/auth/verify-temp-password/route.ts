@@ -1,4 +1,3 @@
-// app/api/auth/verify-temp-password/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import Licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";

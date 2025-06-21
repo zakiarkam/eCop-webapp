@@ -210,6 +210,9 @@ export default function PoliceOfficerTable({
                   <th className="px-6 py-3 border font-semibold">
                     Phone Number
                   </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Police Points
+                  </th>
                   <th className="px-6 py-3 border font-semibold text-center">
                     Blood Group
                   </th>
@@ -276,11 +279,15 @@ export default function PoliceOfficerTable({
                       <td className="px-6 py-4 border">
                         {officer.phoneNumber}
                       </td>
+                      <td className="px-6 py-4 border">
+                        {officer.policePoints}
+                      </td>
                       <td className="px-6 py-4 border text-center">
                         <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
                           {officer.bloodGroup}
                         </span>
                       </td>
+
                       <td className="px-6 py-4 border">
                         {formatDate(officer.dob)}
                       </td>

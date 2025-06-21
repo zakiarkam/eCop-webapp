@@ -16,6 +16,8 @@ interface LicenceRequestBody {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -108,6 +110,8 @@ export async function PUT(
       currentAddress,
       bloodGroup,
       vehicleCategories,
+      phoneNumber,
+      licencePoints,
       issueDatePerCategory,
       expiryDatePerCategory,
     } = body;
@@ -125,6 +129,8 @@ export async function PUT(
       !currentAddress ||
       !bloodGroup ||
       !vehicleCategories ||
+      !phoneNumber ||
+      !licencePoints ||
       vehicleCategories.length === 0
     ) {
       return NextResponse.json(
@@ -198,6 +204,8 @@ export async function PUT(
         permanentAddress,
         currentAddress,
         bloodGroup,
+        phoneNumber,
+        licencePoints,
         vehicleCategories: transformedVehicleCategories,
         updatedBy: session?.user?.id || null,
         updatedAt: new Date(),

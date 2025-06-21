@@ -71,6 +71,11 @@ const policeOfficerSchema = new mongoose.Schema(
         message: "Please enter a valid phone number",
       },
     },
+    policePoints: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     rank: {
       type: String,
       required: true,
