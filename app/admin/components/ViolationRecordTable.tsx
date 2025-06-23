@@ -1,8 +1,10 @@
 "use client";
-import React, { useState } from "react";
-import { Edit, Trash2 } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Edit, Trash2, RefreshCw } from "lucide-react";
+import violationService from "@/services/apiServices/violationApi";
 
 type ViolationRecord = {
+  _id: string;
   username: string;
   licenceNumber: string;
   vehicleNumber: string;
@@ -14,65 +16,49 @@ type ViolationRecord = {
   policeStation: string;
   violationArea: string;
   violationDate: string;
-  status: "Pending" | "Paid" | "Overdue";
+  status: "Pending" | "Paid" | "Overdue" | "Cancelled";
+  points: number;
+  notes?: string;
 };
 
 interface ViolationRecordsTableProps {
   searchTerm: string;
   selectedStation: string;
+  violations: ViolationRecord[];
+  onRefresh: () => void;
 }
 
 export default function ViolationRecordsTable({
   searchTerm,
   selectedStation,
+  violations,
+  onRefresh,
 }: ViolationRecordsTableProps) {
-  const [data] = useState<ViolationRecord[]>([
-    {
-      username: "John Doe",
-      licenceNumber: "B1234567",
-      vehicleNumber: "CAR-1234",
-      mobileNumber: "+94771234567",
-      sectionOfAct: "Section 151",
-      provision: "Exceeding Speed Limit",
-      fineAmount: 2500,
-      policeNumber: "POL123",
-      policeStation: "Colombo Central",
-      violationArea: "Galle Road, Colombo 03",
-      violationDate: "2024-02-22",
-      status: "Pending",
-    },
-    {
-      username: "Jane Smith",
-      licenceNumber: "B7654321",
-      vehicleNumber: "CAB-5678",
-      mobileNumber: "+94777654321",
-      sectionOfAct: "Section 140",
-      provision: "Signal Violation",
-      fineAmount: 3000,
-      policeNumber: "POL456",
-      policeStation: "Kandy Central",
-      violationArea: "Peradeniya Road, Kandy",
-      violationDate: "2024-02-21",
-      status: "Paid",
-    },
-  ]);
-
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const rowsPerPage = 10;
 
-  // Filter data based on search term and selected station
-  const filteredData = data.filter((record) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      record.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.policeNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredData = useMemo(() => {
+    return violations.filter((record) => {
+      const matchesSearch =
+        searchTerm === "" ||
+        record.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.policeNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.licenceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.violationArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.mobileNumber.includes(searchTerm);
 
-    const matchesStation =
-      selectedStation === "" || record.policeStation === selectedStation;
+      const matchesStation =
+        selectedStation === "" || record.policeStation === selectedStation;
 
-    return matchesSearch && matchesStation;
-  });
+      return matchesSearch && matchesStation;
+    });
+  }, [violations, searchTerm, selectedStation]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedStation]);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -85,12 +71,12 @@ export default function ViolationRecordsTable({
     }
   };
 
-  const handleEdit = (index: number) => {
-    console.log("Edit violation record:", filteredData[index]);
+  const handleEdit = (record: ViolationRecord) => {
+    console.log("Edit violation record:", record);
   };
 
-  const handleDelete = (index: number) => {
-    console.log("Delete violation record:", filteredData[index]);
+  const handleDelete = async (record: ViolationRecord) => {
+    console.log("delete violation record:", record);
   };
 
   const getStatusColor = (status: string) => {
@@ -99,6 +85,8 @@ export default function ViolationRecordsTable({
         return "bg-green-100 text-green-800";
       case "Overdue":
         return "bg-red-100 text-red-800";
+      case "Cancelled":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-yellow-100 text-yellow-800";
     }
@@ -111,6 +99,10 @@ export default function ViolationRecordsTable({
       month: "short",
       day: "numeric",
     });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `Rs. ${amount.toLocaleString()}`;
   };
 
   return (
@@ -159,7 +151,7 @@ export default function ViolationRecordsTable({
                 ) : (
                   currentData.map((record, index) => (
                     <tr
-                      key={index}
+                      key={record._id}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4 border font-medium">
@@ -170,12 +162,11 @@ export default function ViolationRecordsTable({
                       </td>
                       <td className="px-6 py-4 border">
                         <div>
-                          <div className="font-medium">{record.username}</div>
                           <div className="text-gray-600">
-                            {record.licenceNumber}
+                            Licence: {record.licenceNumber}
                           </div>
                           <div className="text-gray-600">
-                            {record.mobileNumber}
+                            Mobile: {record.mobileNumber}
                           </div>
                         </div>
                       </td>
@@ -187,11 +178,12 @@ export default function ViolationRecordsTable({
                           <div className="text-gray-600">
                             Act: {record.sectionOfAct}
                           </div>
-                          <div className="text-gray-600">
-                            Violation: {record.provision}
-                          </div>
+
                           <div className="font-medium text-red-600">
-                            Fine: Rs. {record.fineAmount.toLocaleString()}
+                            {formatCurrency(record.fineAmount)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Points: {record.points}
                           </div>
                         </div>
                       </td>
@@ -206,7 +198,7 @@ export default function ViolationRecordsTable({
                         </div>
                       </td>
                       <td className="px-6 py-4 border">
-                        {record.violationArea}
+                        <div className="max-w-xs">{record.violationArea}</div>
                       </td>
                       <td className="px-6 py-4 border text-center">
                         <span
@@ -220,16 +212,22 @@ export default function ViolationRecordsTable({
                       <td className="px-6 py-4 border text-center">
                         <div className="flex justify-center space-x-2">
                           <button
-                            onClick={() => handleEdit(index)}
+                            onClick={() => handleEdit(record)}
                             className="text-[#6DB6FE] hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
                             title="Edit Violation Record"
+                            disabled={record.status === "Cancelled"}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(index)}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors"
-                            title="Delete Violation Record"
+                            onClick={() => handleDelete(record)}
+                            disabled={record.status === "Cancelled"}
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={
+                              record.status === "Cancelled"
+                                ? "Already Cancelled"
+                                : "Cancel Violation Record"
+                            }
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -244,13 +242,13 @@ export default function ViolationRecordsTable({
                 <tfoot>
                   <tr className="bg-gray-100">
                     <td colSpan={9} className="px-6 py-3">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="text-sm text-gray-600">
                           Showing {startIndex + 1} to{" "}
                           {Math.min(endIndex, filteredData.length)} of{" "}
                           {filteredData.length} violation records
                           {(searchTerm || selectedStation) &&
-                            ` (filtered from ${data.length} total)`}
+                            ` (filtered from ${violations.length} total)`}
                         </div>
                         <div className="flex items-center space-x-2">
                           <button

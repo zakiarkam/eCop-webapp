@@ -5,8 +5,9 @@ import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
 
 interface LicenceDetailResponse {
+  success: boolean;
   message: string;
-  licence?: {
+  data?: {
     id: string;
     fullName: string;
     nameWithInitials: string;
@@ -16,6 +17,8 @@ interface LicenceDetailResponse {
     expiryDate: string;
     idNumber: string;
     licenceNumber: string;
+    phoneNumber: string;
+    licencePoints: number;
     permanentAddress: string;
     currentAddress: string;
     bloodGroup: string;
@@ -32,7 +35,7 @@ interface LicenceDetailResponse {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { licenceNumber: string } }
+  { params }: { params: Promise<{ licenceNumber: string }> }
 ): Promise<NextResponse<LicenceDetailResponse>> {
   try {
     const session = await getServerSession();
@@ -40,27 +43,38 @@ export async function GET(
     // Optional: Add authentication check if needed
     // if (!session) {
     //   return NextResponse.json(
-    //     { message: "Unauthorized" },
+    //     { success: false, message: "Unauthorized" },
     //     { status: 401 }
     //   );
     // }
 
     await connectToDatabase();
 
-    const { licenceNumber } = params;
+    // Await the params before accessing properties
+    const { licenceNumber } = await params;
+
+    console.log("Searching for licence number:", licenceNumber);
 
     if (!licenceNumber) {
       return NextResponse.json(
-        { message: "Licence number is required" },
+        { success: false, message: "Licence number is required" },
         { status: 400 }
       );
     }
 
-    const licence = await Licence.findOne({ licenceNumber });
+    // Try both exact match and case-insensitive search
+    const licence = await Licence.findOne({
+      licenceNumber: { $regex: new RegExp(`^${licenceNumber}$`, "i") },
+    });
+
+    console.log("Found licence:", licence ? "Yes" : "No");
 
     if (!licence) {
       return NextResponse.json(
-        { message: "Licence not found" },
+        {
+          success: false,
+          message: "Licence holder not found with this number",
+        },
         { status: 404 }
       );
     }
@@ -74,8 +88,9 @@ export async function GET(
 
     return NextResponse.json(
       {
-        message: "Licence found successfully",
-        licence: {
+        success: true,
+        message: "Licence holder found successfully",
+        data: {
           id: licence._id.toString(),
           fullName: licence.fullName,
           nameWithInitials: licence.nameWithInitials,
@@ -85,6 +100,8 @@ export async function GET(
           expiryDate: licence.expiryDate.toISOString().split("T")[0],
           idNumber: licence.idNumber,
           licenceNumber: licence.licenceNumber,
+          phoneNumber: licence.phoneNumber,
+          licencePoints: licence.licencePoints,
           permanentAddress: licence.permanentAddress,
           currentAddress: licence.currentAddress,
           bloodGroup: licence.bloodGroup,
@@ -100,7 +117,7 @@ export async function GET(
     console.error("Error retrieving licence:", error);
 
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { success: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }
