@@ -195,6 +195,32 @@ class LicenceService {
       throw new Error("Failed to delete licence holder");
     }
   }
+
+  async getLicenceHolderByLicenceNumber(
+    licenceNumber: string
+  ): Promise<ApiResponse<LicenceHolder>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/${licenceNumber}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: ApiResponse<LicenceHolder> = await response.json();
+      return result;
+    } catch (error) {
+      console.error(
+        `Error fetching licence holder with licence number ${licenceNumber}:`,
+        error
+      );
+      throw new Error("Failed to fetch licence holder");
+    }
+  }
 }
 
 export const licenceService = new LicenceService();
