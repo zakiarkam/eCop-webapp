@@ -37,6 +37,7 @@ export default function EditPoliceOfficerModal({
     rank: "",
     joiningDate: "",
     bloodGroup: "",
+    policePoints: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -78,6 +79,7 @@ export default function EditPoliceOfficerModal({
             ? new Date(officer.joiningDate).toISOString().split("T")[0]
             : "",
           bloodGroup: officer.bloodGroup || "",
+          policePoints: officer.policePoints || "",
         });
       } else {
         enqueueSnackbar(result.message || "Failed to fetch officer data", {

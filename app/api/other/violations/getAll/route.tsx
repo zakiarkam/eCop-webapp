@@ -1,19 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import ViolationRecord from "@/models/ViolationRecord";
 import licence from "@/models/licenceHolder";
 import PoliceOfficer from "@/models/policeOfficer";
 import Rule from "@/models/rule";
 import connectDB from "@/lib/mongo/mongodb";
 
-interface ApiResponse<T = any> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  total?: number;
-  error?: string;
-}
-
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     await connectDB();
     console.log("Database connected successfully");
@@ -35,7 +27,7 @@ export async function GET(request: NextRequest) {
         model: Rule,
         select: "section provision fine points",
       })
-      .sort({ createdAt: -1 }) // Sort by newest first
+      .sort({ createdAt: -1 })
       .lean();
 
     console.log(`Found ${violations.length} violation records`);
@@ -86,7 +78,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

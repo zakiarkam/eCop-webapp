@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import PoliceOfficer from "@/models/policeOfficer";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
@@ -31,11 +30,9 @@ interface PoliceOfficerDetailResponse {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { policeNumber: string } }
+  { params }: { params: Promise<{ policeNumber: string }> }
 ): Promise<NextResponse<PoliceOfficerDetailResponse>> {
   try {
-    const session = await getServerSession();
-
     // Optional: Add authentication check if needed
     // if (!session) {
     //   return NextResponse.json(
@@ -46,7 +43,7 @@ export async function GET(
 
     await connectToDatabase();
 
-    const { policeNumber } = params;
+    const { policeNumber } = await params;
 
     if (!policeNumber) {
       return NextResponse.json(

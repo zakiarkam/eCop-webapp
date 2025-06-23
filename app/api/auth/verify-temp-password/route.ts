@@ -9,16 +9,6 @@ interface VerifyTempPasswordRequest {
   temporaryPassword: string;
 }
 
-interface VerifyTempPasswordResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    fullName: string;
-    userId: string;
-    userType: string;
-  };
-}
-
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
     // First try to find in Licence collection
@@ -175,7 +165,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
