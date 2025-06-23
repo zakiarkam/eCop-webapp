@@ -1,10 +1,6 @@
 import ViolationRecord from "@/models/ViolationRecord";
 import connectDB from "@/lib/mongo/mongodb";
-import { NextApiRequest, NextApiResponse } from "next";
-
-interface LicenceNumberQuery {
-  licenceNumber?: string;
-}
+import { NextRequest, NextResponse } from "next/server";
 
 interface ViolationRecordType {
   _id: string;
@@ -42,20 +38,25 @@ interface ErrorResponse {
 
 type ApiResponse = SuccessResponse | ErrorResponse;
 
-export default async function handler(
-  req: NextApiRequest & { query: LicenceNumberQuery },
-  res: NextApiResponse<ApiResponse>
-) {
-  if (req.method !== "GET") {
-    return res
-      .status(405)
-      .json({ success: false, message: "Method not allowed" });
-  }
-
+export async function GET(
+  request: NextRequest
+): Promise<NextResponse<ApiResponse>> {
   try {
     await connectDB();
 
-    const { licenceNumber } = req.query;
+    // Get search params from the URL
+    const { searchParams } = new URL(request.url);
+    const licenceNumber = searchParams.get("licenceNumber");
+
+    if (!licenceNumber) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Licence number is required",
+        },
+        { status: 400 }
+      );
+    }
 
     const violations = await ViolationRecord.find({ licenceNumber })
       .populate("licenceHolderId", "fullName nameWithInitials")
@@ -66,17 +67,23 @@ export default async function handler(
       .populate("ruleId", "section provision fine points")
       .sort({ violationDate: -1 });
 
-    res.status(200).json({
-      success: true,
-      data: violations,
-      total: violations.length,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        data: violations,
+        total: violations.length,
+      },
+      { status: 200 }
+    );
   } catch (error: any) {
     console.error("Error fetching violations by licence number:", error);
-    res.status(500).json({
-      success: false,
-      message: "Internal server error",
-      error: error.message,
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Internal server error",
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

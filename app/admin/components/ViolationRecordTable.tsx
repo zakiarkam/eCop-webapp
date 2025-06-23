@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
-import { Edit, Trash2, RefreshCw } from "lucide-react";
-import violationService from "@/services/apiServices/violationApi";
+import { Edit, Trash2 } from "lucide-react";
 
 type ViolationRecord = {
   _id: string;
@@ -32,10 +31,8 @@ export default function ViolationRecordsTable({
   searchTerm,
   selectedStation,
   violations,
-  onRefresh,
 }: ViolationRecordsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const rowsPerPage = 10;
 
   const filteredData = useMemo(() => {

@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import Licence from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
@@ -38,8 +37,6 @@ export async function GET(
   { params }: { params: Promise<{ licenceNumber: string }> }
 ): Promise<NextResponse<LicenceDetailResponse>> {
   try {
-    const session = await getServerSession();
-
     // Optional: Add authentication check if needed
     // if (!session) {
     //   return NextResponse.json(

@@ -10,11 +10,6 @@ interface SetNewPasswordRequest {
   confirmPassword: string;
 }
 
-interface SetNewPasswordResponse {
-  success: boolean;
-  message: string;
-}
-
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
     const licence = await Licence.findOne({
@@ -171,7 +166,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

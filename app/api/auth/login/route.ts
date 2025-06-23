@@ -9,42 +9,6 @@ interface LoginRequest {
   password: string;
 }
 
-interface LoginResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    fullName: string;
-    userId: string;
-    userType: string;
-    token?: string;
-    user: {
-      fullName: string;
-      nameWithInitials: string;
-      identificationNo: string;
-      email: string;
-      role: string;
-      userType: string;
-      status: string;
-      licenceNumber?: string;
-      phoneNumber: string;
-      licencePoints?: number;
-      policePoints?: number;
-      idNumber: string;
-      issueDate?: string;
-      expiryDate?: string;
-      vehicleCategories?: Array<{
-        category: string;
-        issueDate: string;
-        expiryDate: string;
-      }>;
-      policeNumber?: string;
-      rank?: string;
-      policeStation?: string;
-      badgeNo?: string;
-    };
-  };
-}
-
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
     // First try to find in Licence collection
@@ -82,8 +46,6 @@ async function findUserByIdentificationNo(identificationNo: string) {
 
 export async function POST(request: NextRequest) {
   try {
-    console.log("=== LOGIN API CALLED ===");
-
     let body: LoginRequest;
     try {
       body = await request.json();
@@ -189,7 +151,7 @@ export async function POST(request: NextRequest) {
       lastLoginDate: new Date(),
     });
 
-    let userData: any = {
+    const userData: any = {
       fullName: user.fullName,
       nameWithInitials: user.nameWithInitials,
       identificationNo:
@@ -268,7 +230,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {

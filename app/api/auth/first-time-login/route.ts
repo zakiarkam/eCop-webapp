@@ -13,15 +13,6 @@ interface FirstTimeLoginRequest {
   email: string;
 }
 
-interface FirstTimeLoginResponse {
-  success: boolean;
-  message: string;
-  data?: {
-    fullName: string;
-    userType: string;
-  };
-}
-
 async function findUserByIdentificationNo(identificationNo: string) {
   try {
     const licence = await Licence.findOne({
@@ -235,7 +226,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function OPTIONS(request: NextRequest) {
+export async function OPTIONS() {
   return new NextResponse(null, {
     status: 200,
     headers: {
