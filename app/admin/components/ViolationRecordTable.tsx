@@ -15,9 +15,13 @@ type ViolationRecord = {
   policeStation: string;
   violationArea: string;
   violationDate: string;
-  status: "Pending" | "Paid" | "Overdue" | "Cancelled";
-  points: number;
+  status: "active" | "paid" | "cancelled";
+  paymentStatus: "unpaid" | "paid" | "partially_paid";
+  paymentDate: Date;
   notes?: string;
+  points: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 interface ViolationRecordsTableProps {
@@ -78,14 +82,27 @@ export default function ViolationRecordsTable({
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Paid":
+      case "paid":
         return "bg-green-100 text-green-800";
-      case "Overdue":
+      case "overdue":
         return "bg-red-100 text-red-800";
-      case "Cancelled":
+      case "cancelled":
         return "bg-gray-100 text-gray-800";
       default:
         return "bg-yellow-100 text-yellow-800";
+    }
+  };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "unpaid":
+        return "bg-red-100 text-red-800";
+      case "partially_paid":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -115,10 +132,10 @@ export default function ViolationRecordsTable({
                   <th className="px-6 py-3 border font-semibold">
                     User Details
                   </th>
-                  <th className="px-6 py-3 border font-semibold">
+                  <th className="px-6 py-3 border truncate font-semibold">
                     Vehicle Info
                   </th>
-                  <th className="px-6 py-3 border font-semibold">
+                  <th className="px-6 py-3 border font-semibold truncate">
                     Violation Details
                   </th>
                   <th className="px-6 py-3 border font-semibold">
@@ -127,6 +144,12 @@ export default function ViolationRecordsTable({
                   <th className="px-6 py-3 border font-semibold">Location</th>
                   <th className="px-6 py-3 border font-semibold text-center">
                     Fine Status
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Payment Status
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    payment Date
                   </th>
                   <th className="px-6 py-3 border font-semibold text-center">
                     Actions
@@ -206,22 +229,42 @@ export default function ViolationRecordsTable({
                           {record.status}
                         </span>
                       </td>
+                      <td className="px-6 py-4 border">
+                        <div className="max-w-xs">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(
+                              record.paymentStatus
+                            )}`}
+                          >
+                            {record.paymentStatus}{" "}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div className="">
+                          {formatDate(
+                            record.paymentDate
+                              ? record.paymentDate.toString()
+                              : ""
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 border text-center">
                         <div className="flex justify-center space-x-2">
                           <button
                             onClick={() => handleEdit(record)}
                             className="text-[#6DB6FE] hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
                             title="Edit Violation Record"
-                            disabled={record.status === "Cancelled"}
+                            disabled={record.status === "paid"}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(record)}
-                            disabled={record.status === "Cancelled"}
+                            disabled={record.status === "paid"}
                             className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             title={
-                              record.status === "Cancelled"
+                              record.status === "paid"
                                 ? "Already Cancelled"
                                 : "Cancel Violation Record"
                             }
@@ -237,8 +280,8 @@ export default function ViolationRecordsTable({
 
               {filteredData.length > 0 && (
                 <tfoot>
-                  <tr className="bg-gray-100">
-                    <td colSpan={9} className="px-6 py-3">
+                  <tr className="bg-gray-100 ">
+                    <td colSpan={12} className="px-6 py-3">
                       <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="text-sm text-gray-600">
                           Showing {startIndex + 1} to{" "}

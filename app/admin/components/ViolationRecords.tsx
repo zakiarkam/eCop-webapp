@@ -5,20 +5,32 @@ import { violationService } from "@/services/apiServices/violationApi";
 
 type ViolationRecord = {
   _id: string;
-  username: string;
   licenceNumber: string;
+  licenceHolderId: string;
+  policeNumber: string;
+  policeOfficerId: string;
+  phoneNumber: string;
   vehicleNumber: string;
+  placeOfViolation: string;
+  ruleId: string;
+  ruleSection: string;
+  ruleProvision: string;
+  fine: string;
+  points: number;
+  violationDate: string;
+  status: "active" | "paid" | "cancelled";
+  paymentStatus: "unpaid" | "paid" | "partially_paid";
+  paymentDate: Date;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  policeStation: string;
+  username: string;
   mobileNumber: string;
   sectionOfAct: string;
   provision: string;
   fineAmount: number;
-  policeNumber: string;
-  policeStation: string;
   violationArea: string;
-  violationDate: string;
-  status: "Pending" | "Paid" | "Overdue" | "Cancelled";
-  points: number;
-  notes?: string;
 };
 
 export default function ViolationRecords() {

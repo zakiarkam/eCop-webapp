@@ -323,7 +323,7 @@ export default function PoliceOfficerTable({
               {filteredData.length > 0 && (
                 <tfoot>
                   <tr className="bg-gray-100">
-                    <td colSpan={15} className="px-6 py-3">
+                    <td colSpan={20} className="px-6 py-3">
                       <div className="flex justify-between items-center">
                         <div className="text-sm text-gray-600">
                           Showing {startIndex + 1} to{" "}

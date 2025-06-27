@@ -33,7 +33,6 @@ export default function LicenceDetailsTable({
 
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fetch data from API using the service
   useEffect(() => {
     const fetchLicences = async () => {
       try {
@@ -380,7 +379,7 @@ export default function LicenceDetailsTable({
               {filteredData.length > 0 && (
                 <tfoot>
                   <tr className="bg-gray-100">
-                    <td colSpan={13} className="px-6 py-3">
+                    <td colSpan={18} className="px-6 py-3">
                       <div className="flex justify-between items-center">
                         <div className="text-sm text-gray-600">
                           Showing {startIndex + 1} to{" "}
