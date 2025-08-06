@@ -10,7 +10,6 @@ export async function GET() {
     await connectDB();
     console.log("Database connected successfully");
 
-    // Get all violations without any filtering - let frontend handle filtering
     const violations = await ViolationRecord.find({})
       .populate({
         path: "licenceHolderId",
@@ -49,7 +48,9 @@ export async function GET() {
       policeStation: violation.policeOfficerId?.policeStation || "N/A",
       violationArea: violation.placeOfViolation,
       violationDate: violation.violationDate,
-      status: violation.status === "active" ? "Pending" : "Cancelled",
+      status: violation.status,
+      paymentStatus: violation.paymentStatus,
+      paymentDate: violation.paymentDate,
       points: violation.points,
       notes: violation.notes,
       createdAt: violation.createdAt,

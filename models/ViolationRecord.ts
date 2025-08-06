@@ -68,8 +68,16 @@ const violationRecordSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "cancelled"],
+      enum: ["active", "paid", "cancelled"],
       default: "active",
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["unpaid", "paid", "partially_paid"],
+      default: "unpaid",
+    },
+    paymentDate: {
+      type: Date,
     },
     notes: {
       type: String,
@@ -81,14 +89,24 @@ const violationRecordSchema = new mongoose.Schema(
   }
 );
 
+// Indexes
 violationRecordSchema.index({ licenceNumber: 1 });
 violationRecordSchema.index({ licenceHolderId: 1 });
 violationRecordSchema.index({ policeNumber: 1 });
 violationRecordSchema.index({ policeOfficerId: 1 });
 violationRecordSchema.index({ violationDate: -1 });
 violationRecordSchema.index({ status: 1 });
+violationRecordSchema.index({ paymentStatus: 1 });
 violationRecordSchema.index({ ruleId: 1 });
 
+// Virtual for payment records
+violationRecordSchema.virtual("payments", {
+  ref: "PaymentRecord",
+  localField: "_id",
+  foreignField: "violationId",
+});
+
+// Methods
 violationRecordSchema.methods.getViolationSummary = function () {
   return {
     id: this._id,
@@ -99,7 +117,17 @@ violationRecordSchema.methods.getViolationSummary = function () {
     fine: this.fine,
     points: this.points,
     violationDate: this.violationDate,
+    status: this.status,
+    paymentStatus: this.paymentStatus,
+    paymentDate: this.paymentDate,
   };
+};
+
+violationRecordSchema.methods.markAsPaid = function (paymentDate = new Date()) {
+  this.status = "paid";
+  this.paymentStatus = "paid";
+  this.paymentDate = paymentDate;
+  return this.save();
 };
 
 const ViolationRecord =
