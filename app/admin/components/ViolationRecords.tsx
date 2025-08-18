@@ -71,8 +71,6 @@ export default function ViolationRecords() {
     fetchViolations();
   };
 
-  const uniqueStations = [...new Set(violations.map((v) => v.policeStation))];
-
   return (
     <div className="w-full p-4 bg-gray-100">
       <div className="bg-white rounded-lg shadow-sm p-6">
