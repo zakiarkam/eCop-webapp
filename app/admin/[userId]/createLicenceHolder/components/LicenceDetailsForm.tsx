@@ -43,7 +43,7 @@ export default function LicenceDetailsForm() {
     currentAddress: "",
     bloodGroup: "",
     phoneNumber: "",
-    licencePoints: 0,
+    licencePoints: 100,
     vehicleCategories: [],
     issueDatePerCategory: {},
     expiryDatePerCategory: {},
@@ -67,6 +67,21 @@ export default function LicenceDetailsForm() {
   ];
   const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
+  // Phone number validation function
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const phoneRegex =
+      /^(\+94|94|0)?(70|71|72|74|75|76|77|78|91|92|93|94|95|96|97|98|99)\d{7}$/;
+    return phoneRegex.test(phoneNumber.replace(/\s/g, ""));
+  };
+
+  // Date validation function
+  const validateDateOrder = (issueDate: string, expiryDate: string) => {
+    if (!issueDate || !expiryDate) return true;
+    const issue = new Date(issueDate);
+    const expiry = new Date(expiryDate);
+    return expiry > issue;
+  };
+
   const validateForm = () => {
     const {
       fullName,
@@ -81,7 +96,6 @@ export default function LicenceDetailsForm() {
       currentAddress,
       bloodGroup,
       phoneNumber,
-      licencePoints,
       vehicleCategories,
       issueDatePerCategory,
       expiryDatePerCategory,
@@ -100,7 +114,6 @@ export default function LicenceDetailsForm() {
       !currentAddress ||
       !bloodGroup ||
       !phoneNumber ||
-      !licencePoints ||
       vehicleCategories.length === 0
     ) {
       return "All fields are required.";
@@ -111,14 +124,29 @@ export default function LicenceDetailsForm() {
       return "Age must be 18 or above to obtain a driving licence.";
     }
 
-    const points = licencePoints;
-    if (isNaN(points) || points < 0 || points > 100) {
-      return "Licence points must be a number between 0 and 100.";
+    // Phone number validation
+    if (!validatePhoneNumber(phoneNumber)) {
+      return "Please enter a valid Sri Lankan phone number (e.g., 0771234567, +94771234567).";
     }
 
+    // Date validation for main licence
+    if (!validateDateOrder(issueDate, expiryDate)) {
+      return "Date of Expiry must be after Date of Issue of the licence.";
+    }
+
+    // Date validation for each vehicle category
     for (const category of vehicleCategories) {
       if (!issueDatePerCategory[category] || !expiryDatePerCategory[category]) {
         return `Please provide issue and expiry dates for category: ${category}.`;
+      }
+
+      if (
+        !validateDateOrder(
+          issueDatePerCategory[category],
+          expiryDatePerCategory[category]
+        )
+      ) {
+        return `Date of Expiry must be after Date of Issue for category: ${category}.`;
       }
     }
 
@@ -160,12 +188,14 @@ export default function LicenceDetailsForm() {
 
     setLoading(true);
     try {
+      const formData = { ...form, licencePoints: 100 };
+
       const result = await licenceService.createLicenceHolder(
-        form as CreateLicenceData
+        formData as CreateLicenceData
       );
 
       enqueueSnackbar(
-        `Licence created successfully! Licence ID: ${result.licence?.id}`,
+        `Licence created successfully! Licence ID: ${result.licence?.licenceNumber}`,
         { variant: "success" }
       );
 
@@ -182,7 +212,7 @@ export default function LicenceDetailsForm() {
         currentAddress: "",
         bloodGroup: "",
         phoneNumber: "",
-        licencePoints: 0,
+        licencePoints: 100, // Reset to 100
         vehicleCategories: [],
         issueDatePerCategory: {},
         expiryDatePerCategory: {},
@@ -212,6 +242,9 @@ export default function LicenceDetailsForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    // Don't allow manual changes to licencePoints
+    if (name === "licencePoints") return;
+
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
@@ -364,7 +397,7 @@ export default function LicenceDetailsForm() {
                   name="phoneNumber"
                   type="tel"
                   className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  placeholder="Enter phone number"
+                  placeholder="Enter phone number (e.g., 0771234567)"
                   value={form.phoneNumber}
                   onChange={handleChange}
                   required
@@ -372,8 +405,7 @@ export default function LicenceDetailsForm() {
               </div>
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  Administrative Number (ID No){" "}
-                  <span className="text-red-500">*</span>
+                  NIC Number (ID No) <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="idNumber"
@@ -477,22 +509,8 @@ export default function LicenceDetailsForm() {
                 />
               </div>
 
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Licence Points <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="licencePoints"
-                  type="number"
-                  min="0"
-                  max="100"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  placeholder="Enter licence points (0-100)"
-                  value={form.licencePoints}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+              {/* Hidden Licence Points - Always 100 */}
+              <input name="licencePoints" type="hidden" value={100} />
 
               {/* Vehicle Categories */}
               <div className="relative">

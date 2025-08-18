@@ -26,14 +26,12 @@ type ViolationRecord = {
 
 interface ViolationRecordsTableProps {
   searchTerm: string;
-  selectedStation: string;
   violations: ViolationRecord[];
   onRefresh: () => void;
 }
 
 export default function ViolationRecordsTable({
   searchTerm,
-  selectedStation,
   violations,
 }: ViolationRecordsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,16 +48,13 @@ export default function ViolationRecordsTable({
         record.violationArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
         record.mobileNumber.includes(searchTerm);
 
-      const matchesStation =
-        selectedStation === "" || record.policeStation === selectedStation;
-
-      return matchesSearch && matchesStation;
+      return matchesSearch;
     });
-  }, [violations, searchTerm, selectedStation]);
+  }, [violations, searchTerm]);
 
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedStation]);
+  }, [searchTerm]);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -163,7 +158,7 @@ export default function ViolationRecordsTable({
                       colSpan={9}
                       className="px-6 py-8 text-center text-gray-500"
                     >
-                      {searchTerm || selectedStation
+                      {searchTerm
                         ? "No violation records found matching your search."
                         : "No violation records found."}
                     </td>
@@ -287,7 +282,7 @@ export default function ViolationRecordsTable({
                           Showing {startIndex + 1} to{" "}
                           {Math.min(endIndex, filteredData.length)} of{" "}
                           {filteredData.length} violation records
-                          {(searchTerm || selectedStation) &&
+                          {searchTerm &&
                             ` (filtered from ${violations.length} total)`}
                         </div>
                         <div className="flex items-center space-x-2">

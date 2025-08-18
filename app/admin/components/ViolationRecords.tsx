@@ -35,7 +35,6 @@ type ViolationRecord = {
 
 export default function ViolationRecords() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedStation, setSelectedStation] = useState("");
   const [violations, setViolations] = useState<ViolationRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,15 +67,9 @@ export default function ViolationRecords() {
     setSearchTerm(e.target.value);
   };
 
-  const handleStationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedStation(e.target.value);
-  };
-
   const handleRefresh = () => {
     fetchViolations();
   };
-
-  const uniqueStations = [...new Set(violations.map((v) => v.policeStation))];
 
   return (
     <div className="w-full p-4 bg-gray-100">
@@ -102,19 +95,6 @@ export default function ViolationRecords() {
             onChange={handleSearchChange}
             className="w-full sm:w-1/2 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6DB6FE]"
           />
-
-          <select
-            value={selectedStation}
-            onChange={handleStationChange}
-            className="w-full sm:w-1/4 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-[#6DB6FE]"
-          >
-            <option value="">All Police Stations</option>
-            {uniqueStations.map((station) => (
-              <option key={station} value={station}>
-                {station}
-              </option>
-            ))}
-          </select>
         </div>
 
         {error && (
@@ -141,7 +121,6 @@ export default function ViolationRecords() {
           <div className="py-4">
             <ViolationRecordTable
               searchTerm={searchTerm}
-              selectedStation={selectedStation}
               violations={violations}
               onRefresh={handleRefresh}
             />

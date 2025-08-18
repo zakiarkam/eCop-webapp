@@ -236,7 +236,7 @@ export default function LicenceDetailsTable({
                   <th className="px-6 py-3 border font-semibold">
                     Phone Number
                   </th>
-                  <th className="px-6 py-3 border font-semibold">ID Number</th>
+                  <th className="px-6 py-3 border font-semibold">NIC Number</th>
                   <th className="px-6 py-3 border font-semibold">
                     Licence Number
                   </th>

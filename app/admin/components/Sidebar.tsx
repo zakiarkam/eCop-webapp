@@ -6,6 +6,8 @@ import { RiAdminFill } from "react-icons/ri";
 import SideBarButton from "./SideBarButton";
 import { GiPoliceOfficerHead } from "react-icons/gi";
 import { useUser } from "../.../../../../lib/context/UserContext";
+import { useState, useEffect, useCallback } from "react";
+import { PendingUsersApiService } from "@/services/apiServices/adminApi";
 
 type SideBarProps = {
   status:
@@ -39,6 +41,25 @@ export default function Sidebar({
   handleNotifications,
 }: SideBarProps) {
   const { user, isAuthenticated, isLoading } = useUser();
+  const [pendingUsersCount, setPendingUsersCount] = useState<number>(0);
+
+  const fetchPendingUsersCount = useCallback(async () => {
+    if (user?.role === "admin") {
+      try {
+        const data = await PendingUsersApiService.fetchPendingUsers();
+        setPendingUsersCount(data.length);
+      } catch (error) {
+        console.error("Failed to fetch pending users count:", error);
+        setPendingUsersCount(0);
+      }
+    }
+  }, [user?.role]);
+
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "admin") {
+      fetchPendingUsersCount();
+    }
+  }, [isAuthenticated, user?.role, fetchPendingUsersCount]);
 
   if (isLoading) {
     return (
@@ -76,6 +97,7 @@ export default function Sidebar({
               text="Notifications"
               icon={<FaBell />}
               onClick={handleNotifications}
+              notificationCount={pendingUsersCount}
             />
           )}
           <SideBarButton

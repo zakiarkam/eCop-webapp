@@ -141,26 +141,26 @@ export default function EditPoliceOfficerModal({
     if (!formData.bloodGroup.trim())
       newErrors.bloodGroup = "Blood group is required";
 
-    // Additional validations
     if (formData.idNumber && formData.idNumber.length < 10) {
       newErrors.idNumber = "ID number must be at least 10 characters";
     }
 
-    const phoneRegex = /^(?:\+94|0)?[0-9]{9}$/;
+    const phoneRegex = /^(?:\+94|0)(?:7[0-9]{8}|[1-9][1-9][0-9]{7})$/;
     if (
       formData.phoneNumber &&
       !phoneRegex.test(formData.phoneNumber.replace(/\s/g, ""))
     ) {
-      newErrors.phoneNumber = "Please enter a valid phone number";
+      newErrors.phoneNumber =
+        "Please enter a valid Sri Lankan phone number (e.g., 0771234567 or +94771234567)";
     }
 
     if (
       formData.age &&
       (isNaN(Number(formData.age)) ||
-        Number(formData.age) < 18 ||
+        Number(formData.age) <= 18 ||
         Number(formData.age) > 70)
     ) {
-      newErrors.age = "Age must be between 18 and 70";
+      newErrors.age = "Age must be greater than 18 and not exceed 70";
     }
 
     setErrors(newErrors);
@@ -178,7 +178,7 @@ export default function EditPoliceOfficerModal({
     try {
       const updateData = {
         ...formData,
-        age: parseInt(formData.age, 10).toString(), // Ensure age is string as per interface
+        age: parseInt(formData.age, 10).toString(),
       };
 
       const result = await policeOfficerAPI.updateOfficer(
