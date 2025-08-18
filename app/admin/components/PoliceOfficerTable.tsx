@@ -211,7 +211,7 @@ export default function PoliceOfficerTable({
                     Phone Number
                   </th>
                   <th className="px-6 py-3 border font-semibold">
-                    Police Points
+                    Reward Points
                   </th>
                   <th className="px-6 py-3 border font-semibold text-center">
                     Blood Group
