@@ -33,7 +33,6 @@ export default function LicenceDetailsTable({
 
   const { enqueueSnackbar } = useSnackbar();
 
-  // Fetch data from API using the service
   useEffect(() => {
     const fetchLicences = async () => {
       try {
@@ -234,9 +233,15 @@ export default function LicenceDetailsTable({
                   <th className="px-6 py-3 border font-semibold">
                     Current Address
                   </th>
-                  <th className="px-6 py-3 border font-semibold">ID Number</th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Phone Number
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">NIC Number</th>
                   <th className="px-6 py-3 border font-semibold">
                     Licence Number
+                  </th>
+                  <th className="px-6 py-3 border font-semibold">
+                    Licence Points
                   </th>
                   <th className="px-6 py-3 border  font-semibold">
                     Issue Date
@@ -305,10 +310,16 @@ export default function LicenceDetailsTable({
                           {entry.currentAddress}
                         </div>
                       </td>
+                      <td className="px-6 py-4 border">{entry.phoneNumber}</td>
+
                       <td className="px-6 py-4 border">{entry.idNumber}</td>
                       <td className="px-6 py-4 border font-medium">
                         {entry.licenceNumber}
                       </td>
+                      <td className="px-6 py-4 border">
+                        {entry.licencePoints}
+                      </td>
+
                       <td className="px-6 py-4 truncate border">
                         {formatDate(entry.issueDate)}
                       </td>
@@ -368,7 +379,7 @@ export default function LicenceDetailsTable({
               {filteredData.length > 0 && (
                 <tfoot>
                   <tr className="bg-gray-100">
-                    <td colSpan={13} className="px-6 py-3">
+                    <td colSpan={18} className="px-6 py-3">
                       <div className="flex justify-between items-center">
                         <div className="text-sm text-gray-600">
                           Showing {startIndex + 1} to{" "}

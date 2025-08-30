@@ -11,6 +11,8 @@ export type LicenceHolder = {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: Array<{
     category: string;
     issueDate: string;
@@ -23,7 +25,7 @@ export interface ApiResponse<T = any> {
   data?: T;
   message?: string;
   total?: number;
-  license?: {
+  licence?: {
     id: string;
     fullName: string;
     licenceNumber: string;
@@ -44,6 +46,8 @@ export interface CreateLicenceData {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -61,6 +65,8 @@ export interface UpdateLicenceData {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -187,6 +193,32 @@ class LicenceService {
     } catch (error) {
       console.error("Error deleting licence holder:", error);
       throw new Error("Failed to delete licence holder");
+    }
+  }
+
+  async getLicenceHolderByLicenceNumber(
+    licenceNumber: string
+  ): Promise<ApiResponse<LicenceHolder>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/${licenceNumber}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: ApiResponse<LicenceHolder> = await response.json();
+      return result;
+    } catch (error) {
+      console.error(
+        `Error fetching licence holder with licence number ${licenceNumber}:`,
+        error
+      );
+      throw new Error("Failed to fetch licence holder");
     }
   }
 }

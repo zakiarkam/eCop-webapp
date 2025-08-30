@@ -56,6 +56,11 @@ const licenceSchema = new mongoose.Schema(
       required: true,
       enum: ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"],
     },
+    role: {
+      type: String,
+      default: "licence",
+      enum: ["rmvAdmin", "admin", "licence", "police"],
+    },
     vehicleCategories: [
       {
         category: {
@@ -92,6 +97,45 @@ const licenceSchema = new mongoose.Schema(
       enum: ["active", "expired", "suspended", "revoked"],
       default: "active",
     },
+
+    phoneNumber: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    licencePoints: {
+      type: Number,
+      required: true,
+      default: 0,
+      min: 0,
+      max: 200,
+    },
+    // Authentication related fields
+    email: {
+      type: String,
+      trim: true,
+      lowercase: true,
+    },
+    password: {
+      type: String,
+    },
+    temporaryPassword: {
+      type: String,
+    },
+    temporaryPasswordExpiry: {
+      type: Date,
+    },
+    isFirstTimeLogin: {
+      type: Boolean,
+      default: true,
+    },
+    hasLoggedIn: {
+      type: Boolean,
+      default: false,
+    },
+    lastLoginDate: {
+      type: Date,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -106,6 +150,7 @@ licenceSchema.index({ idNumber: 1 });
 licenceSchema.index({ licenceNumber: 1 });
 licenceSchema.index({ fullName: 1 });
 licenceSchema.index({ status: 1 });
+licenceSchema.index({ email: 1 });
 
 // Virtual for checking if licence is expired
 licenceSchema.virtual("isExpired").get(function () {
@@ -119,6 +164,12 @@ licenceSchema.methods.isCategoryExpired = function (category: any) {
   );
   if (!vehicleCategory) return true;
   return new Date() > vehicleCategory.expiryDate;
+};
+
+// Method to check if temporary password is expired
+licenceSchema.methods.isTemporaryPasswordExpired = function () {
+  if (!this.temporaryPasswordExpiry) return true;
+  return new Date() > this.temporaryPasswordExpiry;
 };
 
 const licence =

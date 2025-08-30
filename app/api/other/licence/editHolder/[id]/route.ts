@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import License from "@/models/licenceHolder";
+import Licence from "@/models/licenceHolder";
 import connectToDatabase from "@/lib/mongo/mongodb";
 import type { NextRequest } from "next/server";
 
@@ -16,6 +16,8 @@ interface LicenceRequestBody {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -23,7 +25,7 @@ interface LicenceRequestBody {
 
 interface LicenceResponse {
   message: string;
-  license?: {
+  licence?: {
     id: string;
     fullName: string;
     licenceNumber: string;
@@ -49,9 +51,9 @@ export async function GET(
       );
     }
 
-    const license = await License.findById(id);
+    const licence = await Licence.findById(id);
 
-    if (!license) {
+    if (!licence) {
       return NextResponse.json(
         { message: "Licence not found" },
         { status: 404 }
@@ -61,7 +63,7 @@ export async function GET(
     return NextResponse.json(
       {
         success: true,
-        data: license,
+        data: licence,
         message: "Licence retrieved successfully",
       },
       { status: 200 }
@@ -108,6 +110,8 @@ export async function PUT(
       currentAddress,
       bloodGroup,
       vehicleCategories,
+      phoneNumber,
+      licencePoints,
       issueDatePerCategory,
       expiryDatePerCategory,
     } = body;
@@ -125,6 +129,8 @@ export async function PUT(
       !currentAddress ||
       !bloodGroup ||
       !vehicleCategories ||
+      !phoneNumber ||
+      !licencePoints ||
       vehicleCategories.length === 0
     ) {
       return NextResponse.json(
@@ -141,8 +147,8 @@ export async function PUT(
     }
 
     // Check if licence exists
-    const existingLicense = await License.findById(id);
-    if (!existingLicense) {
+    const existingLicence = await Licence.findById(id);
+    if (!existingLicence) {
       return NextResponse.json(
         { message: "Licence not found" },
         { status: 404 }
@@ -150,16 +156,16 @@ export async function PUT(
     }
 
     // Check for duplicate ID number or licence number (excluding current record)
-    const duplicateLicense = await License.findOne({
+    const duplicateLicence = await Licence.findOne({
       _id: { $ne: id },
       $or: [{ idNumber }, { licenceNumber }],
     });
 
-    if (duplicateLicense) {
+    if (duplicateLicence) {
       return NextResponse.json(
         {
           message:
-            duplicateLicense.idNumber === idNumber
+            duplicateLicence.idNumber === idNumber
               ? "A licence with this ID number already exists"
               : "A licence with this licence number already exists",
         },
@@ -184,7 +190,7 @@ export async function PUT(
       }
     }
 
-    const updatedLicense = await License.findByIdAndUpdate(
+    const updatedLicence = await Licence.findByIdAndUpdate(
       id,
       {
         fullName,
@@ -198,6 +204,8 @@ export async function PUT(
         permanentAddress,
         currentAddress,
         bloodGroup,
+        phoneNumber,
+        licencePoints,
         vehicleCategories: transformedVehicleCategories,
         updatedBy: session?.user?.id || null,
         updatedAt: new Date(),
@@ -208,11 +216,11 @@ export async function PUT(
     return NextResponse.json(
       {
         message: "Licence updated successfully",
-        license: {
-          id: updatedLicense._id,
-          fullName: updatedLicense.fullName,
-          licenceNumber: updatedLicense.licenceNumber,
-          idNumber: updatedLicense.idNumber,
+        licence: {
+          id: updatedLicence._id,
+          fullName: updatedLicence.fullName,
+          licenceNumber: updatedLicence.licenceNumber,
+          idNumber: updatedLicence.idNumber,
         },
       },
       { status: 200 }

@@ -29,6 +29,7 @@ interface PoliceOfficerResponse {
     fullName: string;
     policeNumber: string;
     badgeNo: string;
+    role: string;
   };
   errors?: string[];
 }
@@ -131,6 +132,7 @@ export async function POST(
       rank,
       joiningDate: new Date(joiningDate),
       bloodGroup,
+      role: "police",
       createdBy: session?.user?.id || null,
     });
 
@@ -144,6 +146,7 @@ export async function POST(
           fullName: savedOfficer.fullName,
           policeNumber: savedOfficer.policeNumber,
           badgeNo: savedOfficer.badgeNo,
+          role: savedOfficer.role,
         },
       },
       { status: 201 }

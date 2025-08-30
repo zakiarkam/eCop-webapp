@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Edit, Trash2 } from "lucide-react";
 
 type ViolationRecord = {
+  _id: string;
   username: string;
-  licenseNumber: string;
+  licenceNumber: string;
   vehicleNumber: string;
   mobileNumber: string;
   sectionOfAct: string;
@@ -14,65 +15,46 @@ type ViolationRecord = {
   policeStation: string;
   violationArea: string;
   violationDate: string;
-  status: "Pending" | "Paid" | "Overdue";
+  status: "active" | "paid" | "cancelled";
+  paymentStatus: "unpaid" | "paid" | "partially_paid";
+  paymentDate: Date;
+  notes?: string;
+  points: number;
+  createdAt: string;
+  updatedAt: string;
 };
 
 interface ViolationRecordsTableProps {
   searchTerm: string;
-  selectedStation: string;
+  violations: ViolationRecord[];
+  onRefresh: () => void;
 }
 
 export default function ViolationRecordsTable({
   searchTerm,
-  selectedStation,
+  violations,
 }: ViolationRecordsTableProps) {
-  const [data] = useState<ViolationRecord[]>([
-    {
-      username: "John Doe",
-      licenseNumber: "B1234567",
-      vehicleNumber: "CAR-1234",
-      mobileNumber: "+94771234567",
-      sectionOfAct: "Section 151",
-      provision: "Exceeding Speed Limit",
-      fineAmount: 2500,
-      policeNumber: "POL123",
-      policeStation: "Colombo Central",
-      violationArea: "Galle Road, Colombo 03",
-      violationDate: "2024-02-22",
-      status: "Pending",
-    },
-    {
-      username: "Jane Smith",
-      licenseNumber: "B7654321",
-      vehicleNumber: "CAB-5678",
-      mobileNumber: "+94777654321",
-      sectionOfAct: "Section 140",
-      provision: "Signal Violation",
-      fineAmount: 3000,
-      policeNumber: "POL456",
-      policeStation: "Kandy Central",
-      violationArea: "Peradeniya Road, Kandy",
-      violationDate: "2024-02-21",
-      status: "Paid",
-    },
-  ]);
-
   const [currentPage, setCurrentPage] = useState(1);
-  const rowsPerPage = 5;
+  const rowsPerPage = 10;
 
-  // Filter data based on search term and selected station
-  const filteredData = data.filter((record) => {
-    const matchesSearch =
-      searchTerm === "" ||
-      record.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.policeNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      record.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredData = useMemo(() => {
+    return violations.filter((record) => {
+      const matchesSearch =
+        searchTerm === "" ||
+        record.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.policeNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.licenceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.violationArea.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        record.mobileNumber.includes(searchTerm);
 
-    const matchesStation =
-      selectedStation === "" || record.policeStation === selectedStation;
+      return matchesSearch;
+    });
+  }, [violations, searchTerm]);
 
-    return matchesSearch && matchesStation;
-  });
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -85,22 +67,37 @@ export default function ViolationRecordsTable({
     }
   };
 
-  const handleEdit = (index: number) => {
-    console.log("Edit violation record:", filteredData[index]);
+  const handleEdit = (record: ViolationRecord) => {
+    console.log("Edit violation record:", record);
   };
 
-  const handleDelete = (index: number) => {
-    console.log("Delete violation record:", filteredData[index]);
+  const handleDelete = async (record: ViolationRecord) => {
+    console.log("delete violation record:", record);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Paid":
+      case "paid":
         return "bg-green-100 text-green-800";
-      case "Overdue":
+      case "overdue":
         return "bg-red-100 text-red-800";
+      case "cancelled":
+        return "bg-gray-100 text-gray-800";
       default:
         return "bg-yellow-100 text-yellow-800";
+    }
+  };
+
+  const getPaymentStatusColor = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "unpaid":
+        return "bg-red-100 text-red-800";
+      case "partially_paid":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -111,6 +108,10 @@ export default function ViolationRecordsTable({
       month: "short",
       day: "numeric",
     });
+  };
+
+  const formatCurrency = (amount: number) => {
+    return `Rs. ${amount.toLocaleString()}`;
   };
 
   return (
@@ -126,10 +127,10 @@ export default function ViolationRecordsTable({
                   <th className="px-6 py-3 border font-semibold">
                     User Details
                   </th>
-                  <th className="px-6 py-3 border font-semibold">
+                  <th className="px-6 py-3 border truncate font-semibold">
                     Vehicle Info
                   </th>
-                  <th className="px-6 py-3 border font-semibold">
+                  <th className="px-6 py-3 border font-semibold truncate">
                     Violation Details
                   </th>
                   <th className="px-6 py-3 border font-semibold">
@@ -138,6 +139,12 @@ export default function ViolationRecordsTable({
                   <th className="px-6 py-3 border font-semibold">Location</th>
                   <th className="px-6 py-3 border font-semibold text-center">
                     Fine Status
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    Payment Status
+                  </th>
+                  <th className="px-6 py-3 border font-semibold text-center">
+                    payment Date
                   </th>
                   <th className="px-6 py-3 border font-semibold text-center">
                     Actions
@@ -151,7 +158,7 @@ export default function ViolationRecordsTable({
                       colSpan={9}
                       className="px-6 py-8 text-center text-gray-500"
                     >
-                      {searchTerm || selectedStation
+                      {searchTerm
                         ? "No violation records found matching your search."
                         : "No violation records found."}
                     </td>
@@ -159,7 +166,7 @@ export default function ViolationRecordsTable({
                 ) : (
                   currentData.map((record, index) => (
                     <tr
-                      key={index}
+                      key={record._id}
                       className="hover:bg-gray-50 transition-colors"
                     >
                       <td className="px-6 py-4 border font-medium">
@@ -170,12 +177,11 @@ export default function ViolationRecordsTable({
                       </td>
                       <td className="px-6 py-4 border">
                         <div>
-                          <div className="font-medium">{record.username}</div>
                           <div className="text-gray-600">
-                            {record.licenseNumber}
+                            Licence: {record.licenceNumber}
                           </div>
                           <div className="text-gray-600">
-                            {record.mobileNumber}
+                            Mobile: {record.mobileNumber}
                           </div>
                         </div>
                       </td>
@@ -187,11 +193,12 @@ export default function ViolationRecordsTable({
                           <div className="text-gray-600">
                             Act: {record.sectionOfAct}
                           </div>
-                          <div className="text-gray-600">
-                            Violation: {record.provision}
-                          </div>
+
                           <div className="font-medium text-red-600">
-                            Fine: Rs. {record.fineAmount.toLocaleString()}
+                            {formatCurrency(record.fineAmount)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Points: {record.points}
                           </div>
                         </div>
                       </td>
@@ -206,7 +213,7 @@ export default function ViolationRecordsTable({
                         </div>
                       </td>
                       <td className="px-6 py-4 border">
-                        {record.violationArea}
+                        <div className="max-w-xs">{record.violationArea}</div>
                       </td>
                       <td className="px-6 py-4 border text-center">
                         <span
@@ -217,19 +224,45 @@ export default function ViolationRecordsTable({
                           {record.status}
                         </span>
                       </td>
+                      <td className="px-6 py-4 border">
+                        <div className="max-w-xs">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${getPaymentStatusColor(
+                              record.paymentStatus
+                            )}`}
+                          >
+                            {record.paymentStatus}{" "}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 border">
+                        <div className="">
+                          {formatDate(
+                            record.paymentDate
+                              ? record.paymentDate.toString()
+                              : ""
+                          )}
+                        </div>
+                      </td>
                       <td className="px-6 py-4 border text-center">
                         <div className="flex justify-center space-x-2">
                           <button
-                            onClick={() => handleEdit(index)}
+                            onClick={() => handleEdit(record)}
                             className="text-[#6DB6FE] hover:text-blue-700 p-2 hover:bg-blue-50 rounded transition-colors"
                             title="Edit Violation Record"
+                            disabled={record.status === "paid"}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => handleDelete(index)}
-                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors"
-                            title="Delete Violation Record"
+                            onClick={() => handleDelete(record)}
+                            disabled={record.status === "paid"}
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={
+                              record.status === "paid"
+                                ? "Already Cancelled"
+                                : "Cancel Violation Record"
+                            }
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -242,15 +275,15 @@ export default function ViolationRecordsTable({
 
               {filteredData.length > 0 && (
                 <tfoot>
-                  <tr className="bg-gray-100">
-                    <td colSpan={9} className="px-6 py-3">
-                      <div className="flex justify-between items-center">
+                  <tr className="bg-gray-100 ">
+                    <td colSpan={12} className="px-6 py-3">
+                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="text-sm text-gray-600">
                           Showing {startIndex + 1} to{" "}
                           {Math.min(endIndex, filteredData.length)} of{" "}
                           {filteredData.length} violation records
-                          {(searchTerm || selectedStation) &&
-                            ` (filtered from ${data.length} total)`}
+                          {searchTerm &&
+                            ` (filtered from ${violations.length} total)`}
                         </div>
                         <div className="flex items-center space-x-2">
                           <button

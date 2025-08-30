@@ -7,7 +7,7 @@ import licenceService, {
   CreateLicenceData,
 } from "@/services/apiServices/licenceApi";
 
-type LicenseFormType = {
+type LicenceFormType = {
   fullName: string;
   nameWithInitials: string;
   dob: string;
@@ -19,6 +19,8 @@ type LicenseFormType = {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: { [key: string]: string };
   expiryDatePerCategory: { [key: string]: string };
@@ -28,7 +30,7 @@ export default function LicenceDetailsForm() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { user } = useUser();
-  const [form, setForm] = useState<LicenseFormType>({
+  const [form, setForm] = useState<LicenceFormType>({
     fullName: "",
     nameWithInitials: "",
     dob: "",
@@ -40,6 +42,8 @@ export default function LicenceDetailsForm() {
     permanentAddress: "",
     currentAddress: "",
     bloodGroup: "",
+    phoneNumber: "",
+    licencePoints: 100,
     vehicleCategories: [],
     issueDatePerCategory: {},
     expiryDatePerCategory: {},
@@ -63,6 +67,21 @@ export default function LicenceDetailsForm() {
   ];
   const bloodGroupOptions = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
+  // Phone number validation function
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const phoneRegex =
+      /^(\+94|94|0)?(70|71|72|74|75|76|77|78|91|92|93|94|95|96|97|98|99)\d{7}$/;
+    return phoneRegex.test(phoneNumber.replace(/\s/g, ""));
+  };
+
+  // Date validation function
+  const validateDateOrder = (issueDate: string, expiryDate: string) => {
+    if (!issueDate || !expiryDate) return true;
+    const issue = new Date(issueDate);
+    const expiry = new Date(expiryDate);
+    return expiry > issue;
+  };
+
   const validateForm = () => {
     const {
       fullName,
@@ -76,6 +95,7 @@ export default function LicenceDetailsForm() {
       permanentAddress,
       currentAddress,
       bloodGroup,
+      phoneNumber,
       vehicleCategories,
       issueDatePerCategory,
       expiryDatePerCategory,
@@ -93,14 +113,40 @@ export default function LicenceDetailsForm() {
       !permanentAddress ||
       !currentAddress ||
       !bloodGroup ||
+      !phoneNumber ||
       vehicleCategories.length === 0
     ) {
       return "All fields are required.";
     }
 
+    const ageNumber = parseInt(age);
+    if (ageNumber < 18) {
+      return "Age must be 18 or above to obtain a driving licence.";
+    }
+
+    // Phone number validation
+    if (!validatePhoneNumber(phoneNumber)) {
+      return "Please enter a valid Sri Lankan phone number (e.g., 0771234567, +94771234567).";
+    }
+
+    // Date validation for main licence
+    if (!validateDateOrder(issueDate, expiryDate)) {
+      return "Date of Expiry must be after Date of Issue of the licence.";
+    }
+
+    // Date validation for each vehicle category
     for (const category of vehicleCategories) {
       if (!issueDatePerCategory[category] || !expiryDatePerCategory[category]) {
         return `Please provide issue and expiry dates for category: ${category}.`;
+      }
+
+      if (
+        !validateDateOrder(
+          issueDatePerCategory[category],
+          expiryDatePerCategory[category]
+        )
+      ) {
+        return `Date of Expiry must be after Date of Issue for category: ${category}.`;
       }
     }
 
@@ -142,12 +188,14 @@ export default function LicenceDetailsForm() {
 
     setLoading(true);
     try {
+      const formData = { ...form, licencePoints: 100 };
+
       const result = await licenceService.createLicenceHolder(
-        form as CreateLicenceData
+        formData as CreateLicenceData
       );
 
       enqueueSnackbar(
-        `Licence created successfully! Licence ID: ${result.license?.id}`,
+        `Licence created successfully! Licence ID: ${result.licence?.licenceNumber}`,
         { variant: "success" }
       );
 
@@ -163,6 +211,8 @@ export default function LicenceDetailsForm() {
         permanentAddress: "",
         currentAddress: "",
         bloodGroup: "",
+        phoneNumber: "",
+        licencePoints: 100, // Reset to 100
         vehicleCategories: [],
         issueDatePerCategory: {},
         expiryDatePerCategory: {},
@@ -192,6 +242,9 @@ export default function LicenceDetailsForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    // Don't allow manual changes to licencePoints
+    if (name === "licencePoints") return;
+
     setForm((prevForm) => ({ ...prevForm, [name]: value }));
   };
 
@@ -201,10 +254,13 @@ export default function LicenceDetailsForm() {
       setForm((prevForm) => ({
         ...prevForm,
         vehicleCategories: [...prevForm.vehicleCategories, value],
-        issueDatePerCategory: { ...prevForm.issueDatePerCategory, [value]: "" },
+        issueDatePerCategory: {
+          ...prevForm.issueDatePerCategory,
+          [value]: prevForm.issueDate || "",
+        },
         expiryDatePerCategory: {
           ...prevForm.expiryDatePerCategory,
-          [value]: "",
+          [value]: prevForm.expiryDate || "",
         },
       }));
     }
@@ -332,57 +388,24 @@ export default function LicenceDetailsForm() {
                   readOnly
                 />
               </div>
+
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  Blood Group <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="bloodGroup"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  value={form.bloodGroup}
-                  onChange={handleChange}
-                  required
-                >
-                  <option value="">Select Blood Group</option>
-                  {bloodGroupOptions.map((group) => (
-                    <option key={group} value={group}>
-                      {group}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Date of Issue of the licence{" "}
-                  <span className="text-red-500">*</span>
+                  Phone Number <span className="text-red-500">*</span>
                 </label>
                 <input
-                  name="issueDate"
-                  type="date"
+                  name="phoneNumber"
+                  type="tel"
                   className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  value={form.issueDate}
+                  placeholder="Enter phone number (e.g., 0771234567)"
+                  value={form.phoneNumber}
                   onChange={handleChange}
                   required
                 />
               </div>
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  Date of Expiry of the licence{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="expiryDate"
-                  type="date"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  value={form.expiryDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Administrative Number (ID No){" "}
-                  <span className="text-red-500">*</span>
+                  NIC Number (ID No) <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="idNumber"
@@ -390,20 +413,6 @@ export default function LicenceDetailsForm() {
                   className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
                   placeholder="Enter ID number"
                   value={form.idNumber}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-gray-800 text-sm mb-2 block">
-                  Licence Number <span className="text-red-500">*</span>
-                </label>
-                <input
-                  name="licenceNumber"
-                  type="text"
-                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
-                  placeholder="Enter licence number"
-                  value={form.licenceNumber}
                   onChange={handleChange}
                   required
                 />
@@ -436,6 +445,73 @@ export default function LicenceDetailsForm() {
                   required
                 />
               </div>
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Blood Group <span className="text-red-500">*</span>
+                </label>
+                <select
+                  name="bloodGroup"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.bloodGroup}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Select Blood Group</option>
+                  {bloodGroupOptions.map((group) => (
+                    <option key={group} value={group}>
+                      {group}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Licence Number <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="licenceNumber"
+                  type="text"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  placeholder="Enter licence number"
+                  value={form.licenceNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Date of Issue of the licence{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="issueDate"
+                  type="date"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.issueDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div>
+                <label className="text-gray-800 text-sm mb-2 block">
+                  Date of Expiry of the licence{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  name="expiryDate"
+                  type="date"
+                  className="bg-gray-100 focus:bg-transparent w-full text-sm text-gray-800 px-4 py-3 rounded-md outline-blue-400 transition-all"
+                  value={form.expiryDate}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {/* Hidden Licence Points - Always 100 */}
+              <input name="licencePoints" type="hidden" value={100} />
+
               {/* Vehicle Categories */}
               <div className="relative">
                 <label className="text-gray-800 text-sm mb-2 block">

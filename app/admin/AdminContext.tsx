@@ -9,15 +9,15 @@ import React, {
 } from "react";
 
 interface AdminStats {
-  totalLicenses: number;
+  totalLicences: number;
   totalPoliceOfficers: number;
   totalRules: number;
   totalUsers: number;
   pendingApprovals: number;
   activeRules: number;
-  expiringSoonLicenses: number;
+  expiringSoonLicences: number;
   recentActivity: {
-    newLicensesThisMonth: number;
+    newLicencesThisMonth: number;
     newOfficersThisMonth: number;
     newUsersThisMonth: number;
   };

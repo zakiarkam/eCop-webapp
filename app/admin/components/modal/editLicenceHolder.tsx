@@ -26,6 +26,8 @@ interface FormData {
   permanentAddress: string;
   currentAddress: string;
   bloodGroup: string;
+  phoneNumber: string;
+  licencePoints: number;
   vehicleCategories: string[];
   issueDatePerCategory: Record<string, string>;
   expiryDatePerCategory: Record<string, string>;
@@ -72,12 +74,112 @@ export default function EditLicenceModal({
     permanentAddress: "",
     currentAddress: "",
     bloodGroup: "",
+    phoneNumber: "",
+    licencePoints: 0,
     vehicleCategories: [],
     issueDatePerCategory: {},
     expiryDatePerCategory: {},
   });
 
   const { enqueueSnackbar } = useSnackbar();
+
+  const validatePhoneNumber = (phoneNumber: string) => {
+    const phoneRegex =
+      /^(\+94|94|0)?(70|71|72|74|75|76|77|78|91|92|93|94|95|96|97|98|99)\d{7}$/;
+    return phoneRegex.test(phoneNumber.replace(/\s/g, ""));
+  };
+
+  const validateDateOrder = (issueDate: string, expiryDate: string) => {
+    if (!issueDate || !expiryDate) return true;
+    const issue = new Date(issueDate);
+    const expiry = new Date(expiryDate);
+    return expiry > issue;
+  };
+
+  // Calculate age from date of birth
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    const age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    return m < 0 || (m === 0 && today.getDate() < birthDate.getDate())
+      ? age - 1
+      : age;
+  };
+
+  const validateForm = () => {
+    const {
+      fullName,
+      nameWithInitials,
+      dob,
+      age,
+      issueDate,
+      expiryDate,
+      idNumber,
+      licenceNumber,
+      permanentAddress,
+      currentAddress,
+      bloodGroup,
+      phoneNumber,
+      vehicleCategories,
+      issueDatePerCategory,
+      expiryDatePerCategory,
+    } = formData;
+
+    // Check required fields
+    if (
+      !fullName ||
+      !nameWithInitials ||
+      !dob ||
+      !age ||
+      !issueDate ||
+      !expiryDate ||
+      !idNumber ||
+      !licenceNumber ||
+      !permanentAddress ||
+      !currentAddress ||
+      !bloodGroup ||
+      !phoneNumber ||
+      vehicleCategories.length === 0
+    ) {
+      return "All fields are required.";
+    }
+
+    // Age validation
+    const ageNumber = parseInt(age);
+    if (ageNumber < 18) {
+      return "Age must be 18 or above to hold a driving licence.";
+    }
+
+    if (!validatePhoneNumber(phoneNumber)) {
+      return "Please enter a valid Sri Lankan phone number (e.g., 0771234567, +94771234567).";
+    }
+
+    if (!validateDateOrder(issueDate, expiryDate)) {
+      return "Date of Expiry must be after Date of Issue of the licence.";
+    }
+
+    for (const category of vehicleCategories) {
+      if (!issueDatePerCategory[category] || !expiryDatePerCategory[category]) {
+        return `Please provide issue and expiry dates for category: ${category}.`;
+      }
+
+      if (
+        !validateDateOrder(
+          issueDatePerCategory[category],
+          expiryDatePerCategory[category]
+        )
+      ) {
+        return `Date of Expiry must be after Date of Issue for category: ${category}.`;
+      }
+    }
+
+    if (idNumber.length < 10) {
+      return "ID number must be at least 10 characters.";
+    }
+
+    return null;
+  };
 
   useEffect(() => {
     const available = vehicleCategoryOptions.filter(
@@ -131,6 +233,8 @@ export default function EditLicenceModal({
           permanentAddress: licence.permanentAddress || "",
           currentAddress: licence.currentAddress || "",
           bloodGroup: licence.bloodGroup || "",
+          phoneNumber: licence.phoneNumber || "",
+          licencePoints: licence.licencePoints,
           vehicleCategories: categories,
           issueDatePerCategory: issueDates,
           expiryDatePerCategory: expiryDates,
@@ -167,22 +271,12 @@ export default function EditLicenceModal({
       [name]: value,
     }));
 
+    // Auto-calculate age when date of birth changes
     if (name === "dob" && value) {
-      const today = new Date();
-      const birthDate = new Date(value);
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-
-      if (
-        monthDiff < 0 ||
-        (monthDiff === 0 && today.getDate() < birthDate.getDate())
-      ) {
-        age--;
-      }
-
+      const calculatedAge = calculateAge(value);
       setFormData((prev) => ({
         ...prev,
-        age: age.toString(),
+        age: calculatedAge.toString(),
       }));
     }
   };
@@ -262,24 +356,11 @@ export default function EditLicenceModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
-    if (formData.vehicleCategories.length === 0) {
-      enqueueSnackbar("Please add at least one vehicle category", {
-        variant: "error",
-      });
+    // Validate form
+    const validationError = validateForm();
+    if (validationError) {
+      enqueueSnackbar(validationError, { variant: "error" });
       return;
-    }
-
-    for (const category of formData.vehicleCategories) {
-      if (
-        !formData.issueDatePerCategory[category] ||
-        !formData.expiryDatePerCategory[category]
-      ) {
-        enqueueSnackbar(`Please provide dates for category ${category}`, {
-          variant: "error",
-        });
-        return;
-      }
     }
 
     setLoading(true);
@@ -296,6 +377,8 @@ export default function EditLicenceModal({
         permanentAddress: formData.permanentAddress,
         currentAddress: formData.currentAddress,
         bloodGroup: formData.bloodGroup,
+        phoneNumber: formData.phoneNumber,
+        licencePoints: formData.licencePoints,
         vehicleCategories: formData.vehicleCategories,
         issueDatePerCategory: formData.issueDatePerCategory,
         expiryDatePerCategory: formData.expiryDatePerCategory,
@@ -306,7 +389,7 @@ export default function EditLicenceModal({
         updateData
       );
 
-      if (result.license) {
+      if (result.licence) {
         enqueueSnackbar("Licence updated successfully", { variant: "success" });
 
         // Fetch updated data
@@ -419,9 +502,25 @@ export default function EditLicenceModal({
                     value={formData.age}
                     onChange={handleInputChange}
                     required
-                    min="16"
+                    min="18"
                     max="100"
+                    readOnly
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="phoneNumber"
+                    type="tel"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter phone number (e.g., 0771234567)"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
 
@@ -451,6 +550,23 @@ export default function EditLicenceModal({
                     onChange={handleInputChange}
                     required
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Licence Points <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="licencePoints"
+                    type="number"
+                    min="0"
+                    max="100"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter licence points (0-100)"
+                    value={formData.licencePoints}
+                    onChange={handleInputChange}
+                    required
                   />
                 </div>
 
@@ -519,7 +635,7 @@ export default function EditLicenceModal({
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-2 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     Current Address <span className="text-red-500">*</span>
                   </label>
                   <textarea

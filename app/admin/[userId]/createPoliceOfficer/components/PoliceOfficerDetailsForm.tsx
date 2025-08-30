@@ -57,6 +57,7 @@ export default function PoliceOfficerDetailsForm() {
     rank: "",
     joiningDate: "",
     bloodGroup: "",
+    policePoints: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -117,9 +118,16 @@ export default function PoliceOfficerDetailsForm() {
       return "ID number must be at least 10 characters.";
     }
 
-    // Phone number validation (Sri Lankan format)
-    if (phoneNumber.length < 10) {
-      return "Please enter a valid phone number.";
+    // Age validation - must be greater than 18
+    const ageNumber = parseInt(age);
+    if (ageNumber <= 18) {
+      return "Age must be greater than 18 years.";
+    }
+
+    // Sri Lankan phone number validation
+    const phoneRegex = /^(?:\+94|0)(?:7[0-9]{8}|[1-9][1-9][0-9]{7})$/;
+    if (!phoneRegex.test(phoneNumber)) {
+      return "Please enter a valid Sri Lankan phone number (e.g., 0771234567 or +94771234567).";
     }
 
     return null;
@@ -157,11 +165,10 @@ export default function PoliceOfficerDetailsForm() {
     setLoading(true);
 
     try {
-      // Use the API function instead of direct fetch
       const result = await policeOfficerAPI.createOfficer(form);
 
       enqueueSnackbar(
-        `Police Officer created successfully! Officer ID: ${result.officer?.id}`,
+        `Police Officer created successfully! Officer ID: ${result.officer?.policeNumber}`,
         { variant: "success" }
       );
 
@@ -182,11 +189,11 @@ export default function PoliceOfficerDetailsForm() {
         rank: "",
         joiningDate: "",
         bloodGroup: "",
+        policePoints: "",
       });
 
       console.log("Police Officer created successfully:", result);
 
-      // Navigate after success
       setTimeout(() => {
         router.push(`/admin/${user?.id}`);
       }, 2000);
@@ -318,7 +325,7 @@ export default function PoliceOfficerDetailsForm() {
 
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  Police Number <span className="text-red-500">*</span>
+                  Police ID <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="policeNumber"
@@ -333,7 +340,7 @@ export default function PoliceOfficerDetailsForm() {
 
               <div>
                 <label className="text-gray-800 text-sm mb-2 block">
-                  ID Number <span className="text-red-500">*</span>
+                  NIC Number <span className="text-red-500">*</span>
                 </label>
                 <input
                   name="idNumber"
