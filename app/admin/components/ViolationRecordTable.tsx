@@ -75,6 +75,17 @@ export default function ViolationRecordsTable({
     console.log("delete violation record:", record);
   };
 
+  const isOverdue = (record: ViolationRecord) => {
+    if (record.paymentStatus === "paid") return false;
+
+    const violationDate = new Date(record.violationDate);
+    const currentDate = new Date();
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(currentDate.getMonth() - 1);
+
+    return violationDate < oneMonthAgo && record.paymentStatus === "unpaid";
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "paid":
@@ -167,7 +178,11 @@ export default function ViolationRecordsTable({
                   currentData.map((record, index) => (
                     <tr
                       key={record._id}
-                      className="hover:bg-gray-50 transition-colors"
+                      className={`transition-colors ${
+                        isOverdue(record)
+                          ? "bg-red-200 hover:bg-red-100"
+                          : "hover:bg-gray-50"
+                      }`}
                     >
                       <td className="px-6 py-4 border font-medium">
                         {startIndex + index + 1}
